@@ -13,7 +13,7 @@
 
 ## Diagrama
 
-Imagen: [img/planificacion.png](img/planificacion.png) (GitHub también dibuja el bloque Mermaid de abajo).
+Imagen vectorial con zoom sin pérdida: [img/planificacion.svg](img/planificacion.svg) · visor interactivo: [diagramas.html](diagramas.html) · imagen fija: [img/planificacion.png](img/planificacion.png). GitHub también dibuja el bloque Mermaid de abajo.
 
 ```mermaid
 erDiagram

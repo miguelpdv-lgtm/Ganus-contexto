@@ -12,7 +12,7 @@
 
 ## Diagrama
 
-Imagen: [img/formularios.png](img/formularios.png) (GitHub también dibuja el bloque Mermaid de abajo).
+Imagen vectorial con zoom sin pérdida: [img/formularios.svg](img/formularios.svg) · visor interactivo: [diagramas.html](diagramas.html) · imagen fija: [img/formularios.png](img/formularios.png). GitHub también dibuja el bloque Mermaid de abajo.
 
 ```mermaid
 erDiagram
