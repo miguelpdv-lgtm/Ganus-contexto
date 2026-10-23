@@ -18,7 +18,10 @@ Formato de cada entrada:
 - Qué: el repositorio pasa a ser solo Markdown y se dedica a consultas y prompts para Formularios y Planificación.
   Se agregan `CLAUDE.md`, `README.md` y la carpeta `contexto/`. Los documentos oficiales se convierten a Markdown en
   `fuentes/`. Las imágenes, los Excel y la presentación se transcriben en `fuentes/diagramas-referencia.md` y
-  `fuentes/track-anexos.md`. El modelo de datos pasa a `modelo-datos/`.
+  `fuentes/track-anexos.md`. El modelo de datos pasa a `modelo-datos/`. Por indicación del usuario se eliminan los
+  32 archivos originales que no eran Markdown (Word, Excel, PowerPoint, PNG, PDF, HTML y SVG); siguen disponibles en
+  la rama `main` y en el historial de git. `Skills_Ganus.pdf` queda reemplazado por `.claude/skills/` y Organización
+  v1.1 por la v1.2.
 - Archivos: `CLAUDE.md`, `README.md`, `contexto/`, `fuentes/`, `modelo-datos/`.
 
 ## 2026-10-23 — Modelo de datos de `forms` y `planning` (borrador v0)
