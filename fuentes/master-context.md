@@ -1,3 +1,5 @@
+> **Fuente de solo lectura.** Documento original del proyecto (ya estaba en Markdown). No se modifica desde este repositorio salvo que el usuario lo pida explícitamente.
+
 # GANUS — MASTER CONTEXT FOR CLAUDE CODE
 ## Cerebro funcional y arquitectónico para desarrollo
 

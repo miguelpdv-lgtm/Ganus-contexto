@@ -26,28 +26,26 @@ Las reglas que deben cumplirse **siempre** (ownership, arquitectura, guardrail d
 ## Decisiones pendientes
 
 Las skills citan decisiones abiertas por código (`DP-xx`). El registro está en
-[`docs/decisiones-pendientes.md`](../../docs/decisiones-pendientes.md). Mientras una decisión esté abierta, la skill
+[`contexto/decisiones-pendientes.md`](../../contexto/decisiones-pendientes.md). Mientras una decisión esté abierta, la skill
 indica qué hacer: implementar solo lo definido y no inventar el resto.
 
 ## Fuentes y abreviaturas
 
 | Código | Documento | Ruta en el repositorio |
 | --- | --- | --- |
-| MC | Master Context Claude Code v1.0 | `Cerebro/Contexto/GANUS_MASTER_CONTEXT_CLAUDE_CODE_v1.0.md` |
-| 00 | Cerebro GANUS MVP v1.1 | `Cerebro/Contexto/00_CEREBRO_GANUS_MVP_v1.1.docx` |
-| v3.1 | Alcance y Especificación Funcional Completa v3.1 | `Cerebro/Contexto/GANUS_Alcance_Especificacion_Funcional_Completa_v3.1_Ciclo_de_Vida.docx` |
-| ARQ | Arquitectura de Referencia v1.1 | `Alcance Funcional/GANUS_Arquitectura_Referencia_v1.1_Evaluacion_y_Base_Oficial.docx` |
-| 02 | Funcional Organización v1.2 | `Alcance Funcional/02_FUNCIONAL_ORGANIZACION_GANUS_v1.2_COMPLETO_FINAL.docx` |
-| 03 | Funcional Inventario y Ciclo de Vida v1.2 | `Alcance Funcional/03_FUNCIONAL_INVENTARIO_Y_CICLO_DE_VIDA_GANUS_v1.2.docx` |
-| 04 | Funcional Formularios Dinámicos v1.3 | `Alcance Funcional/04_FUNCIONAL_FORMULARIOS_DINAMICOS_GANUS_v1.3.docx` |
-| 05 | Funcional Planificación v1.0 | `Alcance Funcional/05_FUNCIONAL_PLANIFICACION_GANUS_v1.0.docx` |
-| 06 | Funcional Mobile v1.0 | `Alcance Funcional/06_FUNCIONAL_MOBILE_GANUS_v1.0.docx` |
-| 07 | Seguimiento, Centro de Control, Knowledge y Advisory v1.0 | `Alcance Funcional/07_FUNCIONAL_SEGUIMIENTO_CENTRO_CONTROL_KNOWLEDGE_ADVISORY_GANUS_v1.0.docx` |
-| 08 | Servicios Transversales v1.0 | `Alcance Funcional/08_SERVICIOS_TRANSVERSALES_GANUS_OPERATIVO_v1.0.docx` |
-| 09C | Contratos e Integraciones MVP v1.0 | `Alcance Funcional/09_CONTRATOS_INTEGRACIONES_GANUS_OPERATIVO_MVP_v1.0.docx` |
-| 09F | Funcionamiento Integral v1.0 | `Alcance Funcional/09_FUNCIONAMIENTO_INTEGRAL_GANUS_OPERATIVO_v1.0.docx` |
-| 10 | Modelo BD Referencia MVP v1.0 | `Alcance Funcional/10_MODELO_BD_REFERENCIA_MVP_GANUS_v1.0.docx` |
-| CONST | Constitución Claude Code v1.0 | `11_CONSTITUCION_CLAUDE_CODE_GANUS_v1.0.docx` |
+| MC | Master Context Claude Code v1.0 | `fuentes/master-context.md` |
+| 00 | Cerebro GANUS MVP v1.1 | `fuentes/00-cerebro-mvp.md` |
+| v3.1 | Alcance y Especificación Funcional Completa v3.1 | `fuentes/alcance-funcional-v3.1.md` |
+| ARQ | Arquitectura de Referencia v1.1 | `fuentes/01-arquitectura-referencia.md` |
+| 02 | Funcional Organización v1.2 | `fuentes/02-organizacion.md` |
+| 03 | Funcional Inventario y Ciclo de Vida v1.2 | `fuentes/03-inventario-ciclo-vida.md` |
+| 04 | Funcional Formularios Dinámicos v1.3 | `fuentes/04-formularios-dinamicos.md` |
+| 05 | Funcional Planificación v1.0 | `fuentes/05-planificacion.md` |
+| 06 | Funcional Mobile v1.0 | `fuentes/06-mobile.md` |
+| 07 | Seguimiento, Centro de Control, Knowledge y Advisory v1.0 | `fuentes/07-seguimiento-control-knowledge-advisory.md` |
+| 08 | Servicios Transversales v1.0 | `fuentes/08-servicios-transversales.md` |
+| 09C | Contratos e Integraciones MVP v1.0 | `fuentes/09c-contratos-integraciones.md` |
+| 09F | Funcionamiento Integral v1.0 | `fuentes/09f-funcionamiento-integral.md` |
+| 10 | Modelo BD Referencia MVP v1.0 | `fuentes/10-modelo-bd-referencia.md` |
+| CONST | Constitución Claude Code v1.0 | `fuentes/11-constitucion-claude-code.md` |
 
-Los `.docx` no se leen de forma confiable desde Claude Code. Se recomienda convertirlos a Markdown en `docs/`
-(por ejemplo con `pandoc`) y actualizar esta tabla.

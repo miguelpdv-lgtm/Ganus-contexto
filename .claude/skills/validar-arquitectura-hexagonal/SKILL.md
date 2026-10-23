@@ -12,7 +12,7 @@ capas vacías. La arquitectura oficial es: **monolito modular + hexagonal/clean 
 ## Fuentes
 - ARQ §4.2 (capas), §5 (fronteras antes que servicios), §6 (arquitectura lógica), §9 (Code First + migraciones), ADR-002.
 - CONST §5 (arquitectura obligatoria), §11 (frontend), §12 (backend), §19 (prohibiciones de autonomía).
-- `drft-Pautas DeSarrollo.docx`: NestJS + TypeScript, Angular, PostgreSQL, Code First, Docker en producción.
+- `fuentes/pautas-desarrollo.md`: NestJS + TypeScript, Angular, PostgreSQL, Code First, Docker en producción.
 
 ## Cuándo usarla
 - Al crear un módulo de dominio o un caso de uso.

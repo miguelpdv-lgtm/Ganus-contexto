@@ -13,7 +13,7 @@ Impedir que Claude Code o un desarrollador invente producto. Antes de escribir c
 - CONST §0, §1 (jerarquía), §2 (mandato), §16 (protocolo ante ambigüedad), §19.
 - MC §19 (fuera del MVP), §21 (reglas absolutas), §28 (no inventar).
 - 05 §4 (fuera de alcance de Planificación), 04 §5 (fuera de alcance de Formularios).
-- `docs/decisiones-pendientes.md`.
+- `contexto/decisiones-pendientes.md`.
 
 ## Cuándo usarla
 - Antes de implementar una historia, endpoint, pantalla o tabla nueva.
@@ -95,7 +95,7 @@ Decisión pendiente: <DP-xx o "ninguna">
 ```
 
 ## Registrar una decisión nueva
-Si la ambigüedad no está en `docs/decisiones-pendientes.md`:
+Si la ambigüedad no está en `contexto/decisiones-pendientes.md`:
 1. Asignar el siguiente código `DP-xx`.
 2. Agregar una fila al resumen (tema, tipo, quién decide, skills bloqueadas, estado `ABIERTA`).
 3. Agregar el detalle: conflicto o vacío, documentos involucrados y, si aplica, una propuesta marcada como tal.
