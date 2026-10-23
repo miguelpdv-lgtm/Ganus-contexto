@@ -40,6 +40,8 @@ que el dueño la apruebe.
 | DP-21 | Estados de mensaje de STAGING (09 frente a Master Context) | Técnica | Arquitectura (ADR) | 12 | ABIERTA |
 | DP-22 | Esquemas físicos para Mobile (servidor), Control, Knowledge y Advisory | Técnica | Arquitectura (ADR) | 2, 14 | ABIERTA |
 | DP-23 | Matriz de permisos por rol en Formularios y Planificación | Funcional | Producto | 5, 6, 7, 9 | ABIERTA |
+| DP-24 | Alcance de un formulario: organización, grupo o finca | Funcional | Producto | 6 (esquema `forms`) | ABIERTA |
+| DP-25 | Idioma de nombres de tablas y columnas (español del equipo o inglés del documento 10) | Técnica | Arquitectura (ADR) | Modelo de datos | ABIERTA |
 
 ## Detalle
 
@@ -164,3 +166,15 @@ El 10 asigna entidades a Mobile (servidor), Control, Knowledge, Advisory y Trans
 09 Funcionamiento §3: Administrador gestiona formularios y planificación; Supervisor planifica, valida, publica y
 controla. Falta la matriz exacta: quién crea, publica y obsoleta formularios; quién crea, valida, publica, cancela
 y cierra tareas; qué ve el Dueño.
+
+### DP-24 — Alcance de un formulario
+Ningún documento dice si un formulario pertenece a una finca, a todo un grupo empresarial o a la organización.
+Afecta la seguridad (quién lo ve) y la reutilización entre fincas del mismo grupo (D-01).
+**Propuesta.** El formulario pertenece a la organización (tenant) y puede limitarse a una finca (`finca_id` opcional).
+
+### DP-25 — Idioma de nombres en la base de datos
+Los diagramas del equipo usan nombres en español (`tarea`, `version_formulario`). El documento 10 y los contratos
+del 09 usan inglés (`task`, `form_version`, `TaskExecutionResult`). La Constitución §19 prohíbe renombrar entidades
+oficiales por estética, así que hay que elegir uno y fijarlo en un ADR.
+**Propuesta.** Elegir uno solo para tablas y columnas. Los códigos de valores (estados, tipos) se mantienen como en
+los contratos (`PUBLISHED`, `SHORT_TEXT`) para que base, API y móvil usen los mismos.
