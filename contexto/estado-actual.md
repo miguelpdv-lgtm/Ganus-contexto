@@ -1,0 +1,37 @@
+# Estado actual
+
+> Este archivo **solo se actualiza cuando el usuario lo indica** (ver `CLAUDE.md` §5). Es lo primero que se lee al
+> empezar una conversación.
+
+**Última actualización:** 2026-10-23 — reorganización del repositorio.
+
+## Contexto de trabajo
+
+| Campo | Valor |
+| --- | --- |
+| Repositorio de código GANUS | _Pendiente: lo indicará el usuario_ |
+| Rama de trabajo actual | _Pendiente: la indicará el usuario_ |
+| Proyecto Jira (clave) | _Pendiente: lo indicará el usuario_ |
+| Ticket en curso | _Ninguno registrado_ |
+| Sprint | _Pendiente_ |
+
+## En curso
+
+- _Ninguna tarea registrada._
+
+## Hecho (según lo indicado por el usuario)
+
+- _Nada registrado todavía._
+
+## Entregables de este repositorio
+
+| Entregable | Estado | Archivo |
+| --- | --- | --- |
+| 14 skills del proyecto | Borrador para revisión del equipo | `.claude/skills/` |
+| Modelo de datos del esquema `forms` | Borrador v0 | `modelo-datos/formularios.md` |
+| Modelo de datos del esquema `planning` | Borrador v0 | `modelo-datos/planificacion.md` |
+| Registro de decisiones pendientes | 25 decisiones abiertas | `contexto/decisiones-pendientes.md` |
+
+## Próximos pasos (indicados por el usuario)
+
+- _Ninguno registrado._
