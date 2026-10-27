@@ -3,7 +3,7 @@
 > Este archivo **solo se actualiza cuando el usuario lo indica** (ver `CLAUDE.md` §5). Es lo primero que se lee al
 > empezar una conversación.
 
-**Última actualización:** 2026-10-23 — reorganización del repositorio.
+**Última actualización:** 2026-10-27 — información recibida sobre el alcance de Formularios (DP-26) y documentos de alcance funcional.
 
 ## Contexto de trabajo
 
@@ -30,7 +30,9 @@
 | 14 skills del proyecto | Borrador para revisión del equipo | `.claude/skills/` |
 | Modelo de datos del esquema `forms` | Borrador v0 | `modelo-datos/formularios.md` |
 | Modelo de datos del esquema `planning` | Borrador v0 | `modelo-datos/planificacion.md` |
-| Registro de decisiones pendientes | 25 decisiones abiertas | `contexto/decisiones-pendientes.md` |
+| Registro de decisiones pendientes | 26 decisiones abiertas | `contexto/decisiones-pendientes.md` |
+| Alcance funcional de Formularios | Documento compartible; base 04 v1.3 | [Claude Docs](https://claude.ai/artifact/H8nfBYqGaC8FBA7hV8KKPV) |
+| Alcance funcional de Planificación | Documento compartible; base 05 v1.0 | [Claude Docs](https://claude.ai/artifact/YbJCVMjdaJgHbN2cpeAqxL) |
 
 ## Próximos pasos (indicados por el usuario)
 

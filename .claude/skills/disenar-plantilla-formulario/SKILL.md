@@ -242,7 +242,7 @@ Reglas del contrato:
 ## Decisiones pendientes que afectan esta skill
 DP-01 (documento que manda), DP-02 (claves de contexto), DP-08 (mapeo campo → atributo), DP-10 (varios tipos de
 activo), DP-11 (condiciones), DP-12 (unidad y límites de evidencia), DP-13 (canal web), DP-14 (mecanismo de captura),
-DP-19 (formulario de alerta), DP-23 (permisos).
+DP-19 (formulario de alerta), DP-23 (permisos), DP-26 (definir estructuras no estandarizables con Formularios).
 
 ## Verificación (04 §27)
 - El formulario se configura sin crear maestros paralelos.

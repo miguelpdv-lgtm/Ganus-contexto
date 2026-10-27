@@ -45,6 +45,11 @@ Del borrador de **Inventario** recibido:
    consulta necesita valores tipados (DP-03).
 3. Las FK hacia Organización (`finca_id`, `espacio_id`) deben ser referencias lógicas, según la convención anterior.
 
+Para **Organización** (información recibida el 2026-10-27):
+1. Falta la relación **finca–proceso**: qué procesos tiene cada finca. Hoy el proceso no está ligado a una finca
+   (02 §11). Formularios la necesita para ofrecer los procesos como claves de contexto, y Planificación para listar
+   solo los procesos de la finca al crear una tarea (05 §10, paso 1). Dirigida al responsable de Organización.
+
 Del borrador de **Ciclo de vida**:
 1. `tarea_etapa_ciclo_vida` es una **tarea referencial**: guía a Planificación, pero no crea tareas solas
    (CONST §7.2, 10 §8). Planificación necesita un contrato para consultarlas.

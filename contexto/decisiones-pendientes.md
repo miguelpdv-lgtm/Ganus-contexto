@@ -42,6 +42,7 @@ que el dueño la apruebe.
 | DP-23 | Matriz de permisos por rol en Formularios y Planificación | Funcional | Producto | 5, 6, 7, 9 | ABIERTA |
 | DP-24 | Alcance de un formulario: organización, grupo o finca | Funcional | Producto | 6 (esquema `forms`) | ABIERTA |
 | DP-25 | Idioma de nombres de tablas y columnas (español del equipo o inglés del documento 10) | Técnica | Arquitectura (ADR) | Modelo de datos | ABIERTA |
+| DP-26 | Formularios para definir estructuras que no se pueden estandarizar | Funcional | Producto | 6 | ABIERTA |
 
 ## Detalle
 
@@ -67,6 +68,9 @@ v3.1 §8.3: activo principal, responsable, ubicación, fecha y código del regis
 D-04: "el formulario no asigna procesos ni actividades a la plantilla".
 **Pregunta.** ¿La clave de contexto "proceso/actividad" del 04 es solo una dimensión que se resuelve en la tarea
 (compatible con D-04), o contradice D-04?
+**Información recibida (2026-10-27).** Los procesos se establecen en Organización y Formularios los trae como
+contexto. Organización debe agregar la relación finca–proceso (ver `modelo-datos/README.md`). Sigue abierto si esto
+es compatible con D-04.
 
 ### DP-03 — Contrato de consulta de población a Inventario
 Falta definir: operaciones de filtro (=, ≠, >, ≥, <, ≤, entre, en lista), combinación (solo Y, o también O),
@@ -101,6 +105,9 @@ aparte, y quién es dueño del contenido frente al sobre. Ver propuesta v0 en la
 ### DP-08 — Mapeo campo → atributo maestro
 03 §6.0 y 10 §11: solo los campos con mapeo explícito y autorizado actualizan atributos del activo.
 Falta: ¿el mapeo se configura en el campo del formulario (Formularios) o en Inventario? ¿Quién lo aprueba?
+**Información recibida (2026-10-27).** La raza y otras características del activo se capturan con formularios
+dinámicos (formulario de levantamiento, 03 §6.0). Formularios no define la plantilla del activo. Sigue abierto dónde
+vive el mapeo que actualiza el atributo maestro.
 
 ### DP-09 — Versiones del formulario
 ¿Pueden coexistir dos versiones publicadas? ¿Publicar v2 vuelve obsoleta a v1 automáticamente? ¿Se permite más de
@@ -178,3 +185,13 @@ del 09 usan inglés (`task`, `form_version`, `TaskExecutionResult`). La Constitu
 oficiales por estética, así que hay que elegir uno y fijarlo en un ADR.
 **Propuesta.** Elegir uno solo para tablas y columnas. Los códigos de valores (estados, tipos) se mantienen como en
 los contratos (`PUBLISHED`, `SHORT_TEXT`) para que base, API y móvil usen los mismos.
+
+### DP-26 — Formularios para definir estructuras que no se pueden estandarizar
+**Información recibida (2026-10-27).** "Cualquier cosa que queramos definir en el sistema que no se pueda
+estandarizar la manejamos con formularios dinámicos". El usuario confirma que esto incluye definir estructuras, no
+solo capturar información.
+**Conflicto.** El 04 §2 dice que Formularios "no debe convertirse en un administrador de maestros" y el 04 §5
+excluye crear copias de maestros dentro del formulario.
+**Falta.** Qué estructuras concretas se definen con Formularios (atributos, catálogos u otras), cómo se distinguen
+de los maestros de Organización e Inventario, y actualizar el 04 en consecuencia.
+**Mientras esté abierta.** No se implementa la definición de estructuras con Formularios más allá de lo que dice el 04.
