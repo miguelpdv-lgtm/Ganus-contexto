@@ -18,8 +18,9 @@ Formato de cada entrada:
 - Qué: por indicación del usuario se agrega una página HTML de presentación que muestra, paso a paso, la creación y
   publicación del formulario «Pesaje» y los registros que se guardan en cada una de las 8 tablas del esquema `forms`
   (propuesta de modelo discutida en la conversación; `modelo-datos/formularios.md` no se modifica). Se publica en
-  `docs/` para servirla con GitHub Pages. Es el único archivo no Markdown del repositorio.
-- Archivos: `docs/index.html`, `docs/.nojekyll`, `contexto/estado-actual.md`.
+  `docs/` para desplegarla en Vercel (el repositorio es privado; `vercel.json` publica solo `docs/`). Es el único
+  contenido no Markdown del repositorio.
+- Archivos: `docs/index.html`, `vercel.json`, `contexto/estado-actual.md`.
 - Rama / Jira: `claude/intelligent-ramanujan-1skub1`.
 
 ## 2026-10-27 — Información recibida sobre el alcance de Formularios
