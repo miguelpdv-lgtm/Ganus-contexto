@@ -14,6 +14,14 @@ Formato de cada entrada:
 
 ---
 
+## 2026-10-30 — Mockup de presentación del formulario «Pesaje»
+- Qué: por indicación del usuario se agrega una página HTML de presentación que muestra, paso a paso, la creación y
+  publicación del formulario «Pesaje» y los registros que se guardan en cada una de las 8 tablas del esquema `forms`
+  (propuesta de modelo discutida en la conversación; `modelo-datos/formularios.md` no se modifica). Se publica en
+  `docs/` para servirla con GitHub Pages. Es el único archivo no Markdown del repositorio.
+- Archivos: `docs/index.html`, `docs/.nojekyll`, `contexto/estado-actual.md`.
+- Rama / Jira: `claude/intelligent-ramanujan-1skub1`.
+
 ## 2026-10-27 — Información recibida sobre el alcance de Formularios
 - Qué: el usuario recibe y comparte cuatro definiciones. (1) La raza y otras características del activo se capturan
   con formularios dinámicos de levantamiento; Formularios no define la plantilla del activo. (2) Organización

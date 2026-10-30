@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GANUS formulario Pesaje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: shell de GANUS; a la izquierda la pantalla del constructor, a la derecha las 8 tablas de forms en orden. Tema claro único, como el frontend real. */
+:root {
+  color-scheme: light;
+  --navy: #082b55; --side: #070e27; --green: #76b82a; --green-d: #5c9a1c; --green-soft: #eaf5dd;
+  --bg: #f4f7fb; --ink: #18304f; --text: #52667a; --muted: #8a9aab; --line: #dfe8f1;
+  --amber: #a8650a; --amber-soft: #fff1d6; --red: #c0392b; --red-soft: #fde8e6; --blue: #2f5d8a; --blue-soft: #e4eef8;
+  --font: "Montserrat", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; line-height: 1.4; }
+button { font-family: inherit; }
+button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 200px minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); height: 100%; }
+.side { background: var(--side); padding: 18px 12px; display: flex; flex-direction: column; gap: 4px; }
+.logo { font-weight: 800; font-size: 34px; color: var(--green); letter-spacing: -1px; line-height: 1; padding: 0 6px; }
+.logo-sub { font-size: 10px; color: #6f7f96; padding: 4px 6px 14px; }
+.nav { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; font-weight: 700; font-size: 12.5px; color: #e3e9f2; border: 1.5px solid transparent; opacity: .55; }
+.nav svg { width: 16px; height: 16px; flex: none; }
+.nav.on { border-color: var(--green); background: rgba(118,184,42,.08); opacity: 1; }
+
+.main { display: grid; grid-template-rows: auto auto minmax(0, 1fr); min-width: 0; min-height: 0; height: 100%; }
+.top { background: var(--navy); display: flex; align-items: center; gap: 16px; padding: 10px 20px; padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.top .word { font-weight: 800; font-size: 24px; color: var(--green); letter-spacing: -.5px; }
+.search { flex: 1; max-width: 380px; background: #fff; border-radius: 999px; padding: 8px 16px; color: var(--muted); font-size: 12px; }
+.top .sp { flex: 1; }
+.user { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 600; font-size: 12px; }
+.av { width: 30px; height: 30px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-weight: 800; }
+
+.stepbar { background: #fff; border-bottom: 1px solid var(--line); padding: 10px 20px; padding-right: max(20px, env(safe-area-inset-right, 0px)); display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; }
+.eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--green-d); }
+.stepbar h1 { margin: 2px 0; font-size: 19px; color: var(--navy); font-weight: 800; }
+.stepbar p { margin: 0; font-size: 12.5px; color: var(--text); max-width: 100ch; }
+.ctrl { display: flex; gap: 6px; }
+.btn { border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 700; font-size: 12px; padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+.btn:hover { border-color: var(--navy); }
+.btn:disabled { opacity: .45; cursor: default; }
+.btn.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+.btn.green { background: var(--green); color: #fff; border-color: var(--green); }
+.dots { grid-column: 1 / -1; display: flex; gap: 4px; }
+.dot { flex: 1; height: 5px; border-radius: 3px; background: var(--line); cursor: pointer; border: 0; padding: 0; }
+.dot.done { background: #b9dc93; }
+.dot.on { background: var(--green); }
+
+.work { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 14px; padding: 14px 20px; padding-right: max(20px, env(safe-area-inset-right, 0px)); min-height: 0; }
+.pane { min-height: 0; overflow: auto; border-radius: 18px; }
+.db { background: #0d1830; color: #c9d6e6; border: 1px solid #1d2b47; padding: 12px; scroll-behavior: smooth; }
+
+.card { background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 14px 34px rgba(8,43,85,.06); padding: 16px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.ch { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 12px; }
+.ic { width: 34px; height: 34px; border-radius: 10px; background: var(--green-soft); color: var(--green-d); display: grid; place-items: center; flex: none; font-weight: 800; }
+.ch h2 { margin: 0; font-size: 15px; color: var(--navy); font-weight: 800; }
+.ch p { margin: 2px 0 0; font-size: 11.5px; }
+.fhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fhead .ttl { font-size: 18px; font-weight: 800; color: var(--navy); }
+.fhead .sp { flex: 1; }
+.badge { font-size: 10px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
+.badge.draft { background: var(--amber-soft); color: var(--amber); }
+.badge.pub { background: var(--green-soft); color: var(--green-d); }
+.tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 10px; }
+.tab { font-size: 11px; font-weight: 700; padding: 5px 9px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.tab.ok { color: var(--green-d); border-color: #cfe6b4; }
+.tab.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.fl label { display: block; font-size: 11px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+.inp { border: 1px solid var(--line); border-radius: 10px; padding: 8px 11px; background: #fbfcfe; color: var(--ink); font-weight: 600; min-height: 34px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.hint { font-weight: 600; font-size: 10px; border-radius: 999px; padding: 2px 8px; }
+.h-org { background: #efe7f8; color: #6a4a8c; } .h-inv { background: var(--amber-soft); color: var(--amber); } .h-fij { background: var(--blue-soft); color: var(--blue); } .h-usr { background: var(--green-soft); color: var(--green-d); }
+.opt { border: 1px solid var(--line); border-radius: 12px; padding: 9px 11px; display: flex; gap: 9px; align-items: flex-start; background: #fff; }
+.opt .bx { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid #b8c6d6; flex: none; margin-top: 1px; display: grid; place-items: center; }
+.opt.on { border-color: #a9d57a; background: #f5fbee; }
+.opt.on .bx { background: var(--green); border-color: var(--green); }
+.opt.on .bx::after { content: ""; width: 7px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translate(1px, -1px); }
+.opt b { display: block; font-size: 12px; color: var(--ink); }
+.opt span { font-size: 10.5px; }
+.note { font-size: 11.5px; color: var(--ink); background: var(--bg); border-radius: 10px; padding: 9px 11px; }
+.note b { color: var(--navy); }
+
+/* Lista de atributos de Inventario */
+.xl { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.xl-h { background: var(--amber-soft); color: var(--amber); font-size: 10.5px; font-weight: 800; padding: 6px 10px; letter-spacing: .04em; }
+.xl table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+.xl th { background: #f7f9fc; color: var(--ink); text-align: left; padding: 6px 8px; font-size: 11px; border-bottom: 1px solid var(--line); }
+.xl td { padding: 5px 8px; border-bottom: 1px solid var(--line); color: var(--text); }
+.xl .sel { background: #eef8e2; color: var(--green-d); font-weight: 700; }
+.xl th.sel { box-shadow: inset 0 -3px 0 var(--green); }
+.xl .no { color: #b3bfcc; }
+.xl .chk { text-align: left; font-size: 10px; font-weight: 800; padding: 5px 8px; }
+
+.sec { border: 1px solid var(--line); border-radius: 14px; padding: 10px; background: #fbfcfe; }
+.sec h3 { margin: 0 0 4px; font-size: 12.5px; color: var(--navy); display: flex; justify-content: space-between; }
+.sec h3 small { font-weight: 600; color: var(--muted); font-size: 10.5px; }
+.fld { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; margin-top: 6px; }
+.fld.sel { border-color: var(--green); box-shadow: 0 0 0 2px var(--green-soft); }
+.fld .t { width: 30px; height: 26px; border-radius: 7px; background: var(--blue-soft); color: var(--blue); font-family: var(--mono); font-size: 9px; font-weight: 600; display: grid; place-items: center; }
+.fld b { font-size: 12px; color: var(--ink); display: block; }
+.fld span { font-size: 10px; color: var(--muted); }
+.tag { font-size: 9.5px; font-weight: 800; padding: 2px 7px; border-radius: 999px; background: var(--red-soft); color: var(--red); }
+.ok-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.ok-list li { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--ink); }
+.ok-list li::before { content: "✓"; width: 18px; height: 18px; border-radius: 50%; background: var(--green); color: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 800; flex: none; }
+
+.phone { width: 250px; margin: 0 auto; background: #0b1426; border-radius: 30px; padding: 10px; box-shadow: 0 20px 40px rgba(8,43,85,.18); }
+.ph-in { background: var(--bg); border-radius: 22px; overflow: hidden; min-height: 400px; }
+.ph-top { background: var(--navy); color: #fff; padding: 10px 12px; }
+.ph-top b { display: block; font-size: 12px; } .ph-top span { font-size: 10px; color: #b9c8db; }
+.ph-body { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+.ph-sec { font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--green-d); }
+.ph-f { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; }
+.ph-f label { display: block; font-size: 10px; font-weight: 700; color: var(--ink); margin-bottom: 3px; }
+.ph-f label i { color: var(--red); font-style: normal; }
+.ph-v { font-size: 12px; font-weight: 700; color: var(--navy); }
+.ph-radio { display: flex; flex-direction: column; gap: 3px; font-size: 11px; color: var(--ink); }
+.ph-radio span::before { content: "○ "; color: var(--muted); }
+.ph-radio span.on::before { content: "● "; color: var(--green); }
+.ph-ctx { font-size: 10px; background: #efe7f8; color: #6a4a8c; border-radius: 8px; padding: 6px 8px; font-weight: 600; }
+.ph-rfid { font-size: 10.5px; background: var(--green-soft); color: var(--green-d); border-radius: 8px; padding: 6px 8px; font-weight: 700; }
+.ph-btn { background: var(--green); color: #fff; font-weight: 800; text-align: center; padding: 9px; border-radius: 10px; font-size: 12px; }
+.ph-err { font-size: 10px; color: var(--red); font-weight: 600; margin-top: 3px; }
+
+.focus { animation: pulse 1.6s ease-out 2; border-radius: 12px; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(118,184,42,.55); } 100% { box-shadow: 0 0 0 12px rgba(118,184,42,0); } }
+.typed::after { content: "▍"; color: var(--green); animation: blink .7s steps(1) infinite; }
+.typed.done::after { content: ""; }
+@keyframes blink { 50% { opacity: 0; } }
+.enter { animation: enter .45s ease-out both; }
+@keyframes enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Base de datos */
+.db-h { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.db-h b { color: #fff; font-size: 13px; }
+.db-h b span { color: var(--green); }
+.db-sub { font-size: 11px; color: #8fa5c2; margin-bottom: 10px; }
+.leg { display: flex; gap: 6px; align-items: center; }
+.op { font-family: var(--mono); font-size: 9.5px; font-weight: 600; padding: 2px 6px; border-radius: 4px; }
+.op.ins { background: rgba(118,184,42,.22); color: #a9dd6f; }
+.op.upd { background: rgba(240,170,60,.22); color: #f3c06f; }
+.tb { background: #111f3b; border: 1px solid #21345a; border-radius: 12px; margin-bottom: 8px; overflow: hidden; scroll-margin: 10px; transition: border-color .3s, box-shadow .3s; }
+.tb.now { border-color: var(--green); box-shadow: 0 0 0 2px rgba(118,184,42,.35); }
+.tb.empty { opacity: .55; }
+.tb-h { display: flex; align-items: center; gap: 8px; padding: 7px 10px; font-family: var(--mono); font-size: 11.5px; color: #e6eef8; }
+.tb-h .n { width: 18px; height: 18px; border-radius: 50%; background: #21345a; color: #c9d6e6; display: grid; place-items: center; font-size: 10px; flex: none; }
+.tb.now .tb-h .n { background: var(--green); color: #fff; }
+.tb-h .sch { color: #7f93ad; }
+.tb-h .cnt { margin-left: auto; color: #7f93ad; font-size: 10.5px; }
+.tb-h .what { font-family: var(--font); font-size: 10.5px; color: #8fa5c2; }
+.tb-b { overflow-x: auto; border-top: 1px solid #21345a; }
+.tb-e { border-top: 1px dashed #21345a; padding: 6px 10px; font-size: 10.5px; color: #6f84a1; }
+.tb table { border-collapse: collapse; font-family: var(--mono); font-size: 10.5px; min-width: 100%; }
+.tb th { text-align: left; color: #8fa5c2; font-weight: 500; padding: 5px 8px; white-space: nowrap; background: #0f1b34; }
+.tb td { padding: 5px 8px; border-top: 1px solid #1a2a4a; white-space: nowrap; color: #c9d6e6; }
+.tb td.nul { color: #4f6380; }
+.tb td.json { white-space: normal; word-break: break-word; min-width: 110px; }
+.tb th, .tb td { padding-left: 7px; padding-right: 7px; }
+.tb tr.ins td { background: #1b3330; color: #e7f6d6; }
+.tb tr.ins td:first-child { box-shadow: inset 3px 0 0 var(--green); }
+.tb td.upd { background: #4a3a1c; color: #ffe2b0; }
+.tb tr.updrow td:first-child { box-shadow: inset 3px 0 0 #f0aa3c; }
+.evt { background: #13264a; border: 1px dashed #3d5f93; border-radius: 12px; padding: 8px 10px; font-size: 11px; color: #c9d9f0; margin-bottom: 8px; }
+.evt b { color: #fff; font-family: var(--mono); }
+
+@media (max-width: 1100px) { .work { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto; } .app { grid-template-rows: auto; } .app { height: auto; } html, body { height: auto; } .pane { overflow: visible; } }
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); } .side { display: none; } .search, .user span { display: none; }
+  .stepbar { grid-template-columns: minmax(0, 1fr); } .grid2, .grid3 { grid-template-columns: minmax(0, 1fr); }
+  .work, .stepbar, .top { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .xl { overflow-x: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .focus, .enter, .typed::after { animation: none; } .db { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side" aria-label="Menú">
+    <div class="logo">GANUS</div>
+    <div class="logo-sub">Enterprise field platform</div>
+    <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Inicio</div>
+    <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14"/></svg>Organización</div>
+    <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><circle cx="6" cy="16" r="4"/><circle cx="18" cy="16" r="4"/></svg>Inventario</div>
+    <div class="nav on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 12l2 2 4-4"/></svg>Formularios · Field Engine</div>
+    <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Planificación · MAKE</div>
+    <div class="nav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>Operativo</div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <div class="word">GANUS</div>
+      <div class="search">Buscar activo, identificador o código</div>
+      <div class="sp"></div>
+      <div class="user"><div class="av">L</div><span>Laura Gómez · Administradora</span></div>
+    </header>
+    <div class="stepbar">
+      <div>
+        <div class="eyebrow" id="eyebrow"></div>
+        <h1 id="stitle"></h1>
+        <p id="sdesc"></p>
+      </div>
+      <div class="ctrl">
+        <button class="btn" id="prev" type="button">◀ Anterior</button>
+        <button class="btn primary" id="next" type="button">Siguiente ▶</button>
+        <button class="btn green" id="play" type="button">▶ Reproducir</button>
+      </div>
+      <div class="dots" id="dots" role="tablist" aria-label="Pasos"></div>
+    </div>
+    <div class="work">
+      <section class="pane" id="screen" aria-live="polite"></section>
+      <section class="pane db" id="db" aria-label="Base de datos"></section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Las 8 tablas de forms, en el orden en que se van llenando */
+const TABLES = [
+  ["forms.formulario", "Identidad del formulario", ["id","organizacion_id","nombre","creado_por","creado_en"]],
+  ["forms.version_formulario", "Versiones y estado", ["id","formulario_id","numero_version","estado","creado_en","publicado_por","publicado_en"]],
+  ["forms.clave_busqueda", "Atributos de Inventario para búsqueda", ["id","version_formulario_id","atributo_id","nombre"]],
+  ["forms.clave_contexto", "Dimensiones de contexto del resultado", ["id","version_formulario_id","dimension","tipo_espacio_id","nombre"]],
+  ["forms.filtro_disponible", "Dimensiones habilitadas para filtrar", ["id","version_formulario_id","origen","referencia_id","nombre"]],
+  ["forms.seccion_formulario", "Secciones", ["id","version_formulario_id","titulo","orden"]],
+  ["forms.campo_formulario", "Campos de captura", ["id","seccion_id","nombre","tipo","orden","obligatorio","valor_inicial","reglas"]],
+  ["forms.opcion_campo", "Opciones de los campos de selección", ["id","campo_formulario_id","etiqueta","orden","activa"]]
+];
+const N = null;
+const ins = (t, row) => ({ op: "INSERT", t: "forms." + t, row });
+const upd = (t, id, set) => ({ op: "UPDATE", t: "forms." + t, id, set });
+
+const fl = (label, val, hint = "", cls = "") => `<div class="fl ${cls}"><label>${label}</label><div class="inp"><span>${val}</span>${hint}</div></div>`;
+const H = { org: t => `<span class="hint h-org">${t}</span>`, inv: t => `<span class="hint h-inv">${t}</span>`, fij: t => `<span class="hint h-fij">${t}</span>`, usr: t => `<span class="hint h-usr">${t}</span>` };
+const typed = t => `<span class="typed" data-text="${t}"></span>`;
+const opt = (t, s, on, cls = "") => `<div class="opt ${on ? "on" : ""} ${cls}"><div class="bx"></div><div><b>${t}</b><span>${s}</span></div></div>`;
+const card = (ic, title, sub, body, cls = "") => `<div class="card enter ${cls}"><div class="ch"><div class="ic">${ic}</div><div><h2>${title}</h2><p>${sub}</p></div></div>${body}</div>`;
+const TABS = ["Datos generales", "Claves de búsqueda", "Claves de contexto", "Filtros", "Secciones", "Campos", "Opciones", "Vista previa", "Publicar"];
+const fe = (tab, pub, body) => `<div class="stack"><div class="card enter"><div class="fhead"><span class="ttl">${tab === 0 ? "Nuevo formulario" : "Pesaje"}</span><span class="badge ${pub ? "pub" : "draft"}">${pub ? "Publicada · versión 1" : "Borrador · versión 1"}</span><span class="sp"></span><button class="btn" type="button" tabindex="-1">Guardar</button><button class="btn primary" type="button" tabindex="-1">Publicar</button></div>
+  <div class="tabs">${TABS.map((t, i) => `<span class="tab ${i === tab ? "on" : i < tab ? "ok" : ""}">${i < tab ? "✓ " : ""}${t}</span>`).join("")}</div></div>${body}</div>`;
+
+/* Atributos del tipo de activo publicados por Inventario */
+const ATR = [["RFID", "Identificador", true], ["Sexo", "Lista", true], ["Edad (meses)", "Número (calculado)", true], ["Raza", "Lista", true], ["Peso actual", "Decimal", false]];
+const atrBusqueda = sel => `<div class="xl"><div class="xl-h">ATRIBUTOS DEL TIPO DE ACTIVO «BOVINO» · PUBLICADOS POR INVENTARIO</div><table>
+  <thead><tr><th>Atributo</th><th>Tipo de dato</th><th>Apto para búsqueda</th><th>Clave de búsqueda</th></tr></thead><tbody>
+  ${ATR.map(([a, t, apto]) => { const s = sel.includes(a); return `<tr><td class="${s ? "sel" : !apto ? "no" : ""}">${a}</td><td class="${s ? "sel" : !apto ? "no" : ""}">${t}</td><td class="${s ? "sel" : !apto ? "no" : ""}">${apto ? "Sí" : "No"}</td><td class="chk ${s ? "sel" : ""}">${s ? "✓ Seleccionada" : apto ? "—" : "No disponible"}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+const atrFiltro = sel => `<div class="xl"><div class="xl-h">CLAVES DE BÚSQUEDA DE ESTE FORMULARIO</div><table>
+  <thead><tr><th>Dimensión</th><th>Uso</th><th>Filtro disponible</th></tr></thead><tbody>
+  ${[["RFID", "Identificar un animal específico"], ["Sexo", "Segmentar la población"], ["Edad (meses)", "Segmentar la población"]].map(([a, u]) => { const s = sel.includes(a); return `<tr><td class="${s ? "sel" : ""}">${a}</td><td class="${s ? "sel" : ""}">${u}</td><td class="chk ${s ? "sel" : ""}">${s ? "✓ Habilitado" : "—"}</td></tr>`; }).join("")}
+  </tbody></table></div>`;
+const designer = sel => `<div class="sec"><h3>Pesaje <small>sección 1</small></h3>
+  ${sel >= 1 ? `<div class="fld ${sel === 1 ? "sel focus" : ""}"><div class="t">DEC</div><div><b>Peso (kg)</b><span>DECIMAL · entre 50 y 1.000</span></div><span class="tag">Obligatorio</span></div>` : ""}
+  ${sel >= 2 ? `<div class="fld ${sel === 2 ? "sel focus" : ""}"><div class="t">SEL</div><div><b>Condición corporal</b><span>SINGLE_SELECT${sel >= 3 ? " · 3 opciones" : ""}</span></div><span class="tag">Obligatorio</span></div>` : ""}</div>`;
+
+const STEPS = [
+  { title: "Creación del formulario «Pesaje»",
+    desc: "La administradora registra el nombre del formulario. La organización se toma de la sesión del usuario. El sistema crea el formulario y su versión 1 en estado borrador (DRAFT).",
+    screen: () => fe(0, false, card("1", "Datos generales", "El usuario solo ingresa el nombre del formulario.",
+      `<div class="grid2">${fl("Nombre", typed("Pesaje"), H.usr("Ingresado por el usuario"), "focus")}${fl("Organización", "Ganadera La Esperanza", H.org("Tomada de la sesión"))}</div>
+       <div class="note" style="margin-top:10px">El identificador, el número de versión, el estado <b>DRAFT</b> y las fechas los genera el sistema.</div>`)),
+    ops: [ins("formulario", { id: "frm-01", organizacion_id: "org-01", nombre: "Pesaje", creado_por: "usr-laura", creado_en: "2026-10-30 09:00" }),
+          ins("version_formulario", { id: "ver-01", formulario_id: "frm-01", numero_version: 1, estado: "DRAFT", creado_en: "2026-10-30 09:00", publicado_por: N, publicado_en: N })] },
+  { title: "Claves de búsqueda",
+    desc: "Inventario publica los atributos del tipo de activo y cuáles son aptos para búsqueda. Se seleccionan RFID, para identificar al animal en campo, y Sexo y Edad, para segmentar la población. Se almacena la referencia al atributo, no su valor.",
+    screen: () => fe(1, false, card("2", "Claves de búsqueda", "Lista entregada por Inventario. El usuario selecciona los atributos que usará el formulario.",
+      `${atrBusqueda(["RFID", "Sexo", "Edad (meses)"])}
+       <div class="note" style="margin-top:10px">«Peso actual» no está habilitado para búsqueda: la aptitud de cada atributo la define Inventario (04 §8).</div>`, "focus")),
+    ops: [ins("clave_busqueda", { id: "cb-01", version_formulario_id: "ver-01", atributo_id: "inv-atr-rfid", nombre: "RFID" }),
+          ins("clave_busqueda", { id: "cb-02", version_formulario_id: "ver-01", atributo_id: "inv-atr-sexo", nombre: "Sexo" }),
+          ins("clave_busqueda", { id: "cb-03", version_formulario_id: "ver-01", atributo_id: "inv-atr-edad", nombre: "Edad (meses)" })] },
+  { title: "Claves de contexto",
+    desc: "Se definen las dimensiones que acompañarán cada resultado: proceso, tipo de actividad y potrero. Una dimensión es la categoría del dato, no su valor. Los valores concretos se asignan al crear la tarea en Planificación.",
+    screen: () => fe(2, false, card("3", "Claves de contexto", "Dimensiones de Organización que permiten interpretar dónde y para qué se capturó cada resultado.",
+      `<div class="grid3">${opt("Proceso", "Dimensión de Organización", true, "focus")}${opt("Tipo de actividad", "Dimensión de Organización", true, "focus")}${opt("Ubicación · nivel Potrero", "Jerarquía de espacios", true, "focus")}</div>
+       <table class="mini" style="margin-top:12px"><thead><tr><th>Dimensión (se guarda ahora)</th><th>Valor (lo asigna la tarea)</th></tr></thead>
+       <tbody><tr><td>Proceso</td><td>Manejo animal</td></tr><tr><td>Tipo de actividad</td><td>Pesaje</td></tr><tr><td>Potrero</td><td>P-03</td></tr></tbody></table>`)),
+    ops: [ins("clave_contexto", { id: "cc-01", version_formulario_id: "ver-01", dimension: "PROCESS", tipo_espacio_id: N, nombre: "Proceso" }),
+          ins("clave_contexto", { id: "cc-02", version_formulario_id: "ver-01", dimension: "ACTIVITY_TYPE", tipo_espacio_id: N, nombre: "Tipo de actividad" }),
+          ins("clave_contexto", { id: "cc-03", version_formulario_id: "ver-01", dimension: "SPACE_LEVEL", tipo_espacio_id: "org-nivel-potrero", nombre: "Potrero" })] },
+  { title: "Filtros disponibles",
+    desc: "Se indican las dimensiones sobre las que Planificación podrá filtrar la población: Sexo y Edad. El formulario no define valores; Planificación aplicará los criterios en cada tarea, por ejemplo Sexo = Hembra y Edad ≥ 24 meses.",
+    screen: () => fe(3, false, card("4", "Filtros disponibles", "Se habilitan dimensiones; los criterios con sus valores los define Planificación (04 §10).",
+      `${atrFiltro(["Sexo", "Edad (meses)"])}
+       <div class="note" style="margin-top:10px">RFID no se habilita como filtro porque identifica un animal específico; no sirve para segmentar una población.<br>Ejemplo de criterio en Planificación: <b>Sexo = Hembra</b> y <b>Edad ≥ 24 meses</b>.</div>`, "focus")),
+    ops: [ins("filtro_disponible", { id: "fd-01", version_formulario_id: "ver-01", origen: "INVENTORY_ATTRIBUTE", referencia_id: "inv-atr-sexo", nombre: "Sexo" }),
+          ins("filtro_disponible", { id: "fd-02", version_formulario_id: "ver-01", origen: "INVENTORY_ATTRIBUTE", referencia_id: "inv-atr-edad", nombre: "Edad (meses)" })] },
+  { title: "Sección del formulario",
+    desc: "El formulario se organiza en secciones. Este ejemplo utiliza una única sección, llamada «Pesaje».",
+    screen: () => fe(4, false, card("5", "Diseñador de campos", "Se crea la sección y luego sus campos.",
+      `<div class="sec focus"><h3>${typed("Pesaje")} <small>sección 1</small></h3><div class="note">Sin campos todavía</div></div>`)),
+    ops: [ins("seccion_formulario", { id: "sec-01", version_formulario_id: "ver-01", titulo: "Pesaje", orden: 1 })] },
+  { title: "Campo «Peso (kg)»",
+    desc: "Campo numérico decimal y obligatorio, con una regla de validación: el valor debe estar entre 50 y 1.000 kg.",
+    screen: () => fe(5, false, `<div class="grid2" style="align-items:start">${card("6", "Diseñador de campos", "Sección Pesaje.", designer(1))}
+      ${card("⚙", "Propiedades", "Campo seleccionado: Peso (kg).",
+        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Peso (kg)"), H.usr("Ingresado por el usuario"))}${fl("Tipo de dato", "DECIMAL", H.fij("Lista del sistema"))}${fl("Obligatorio", "Sí")}${fl("Regla de validación", "Mínimo 50 · máximo 1.000", "", "focus")}</div>`)}</div>`),
+    ops: [ins("campo_formulario", { id: "cf-01", seccion_id: "sec-01", nombre: "Peso (kg)", tipo: "DECIMAL", orden: 1, obligatorio: true, valor_inicial: N, reglas: { min: 50, max: 1000 } })] },
+  { title: "Campo «Condición corporal»",
+    desc: "Campo de selección única y obligatorio: el operador elige una opción de una lista definida en el formulario.",
+    screen: () => fe(5, false, `<div class="grid2" style="align-items:start">${card("7", "Diseñador de campos", "Sección Pesaje.", designer(2))}
+      ${card("⚙", "Propiedades", "Campo seleccionado: Condición corporal.",
+        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Condición corporal"), H.usr("Ingresado por el usuario"))}${fl("Tipo de dato", "SINGLE_SELECT", H.fij("Lista del sistema"), "focus")}${fl("Obligatorio", "Sí")}</div>`)}</div>`),
+    ops: [ins("campo_formulario", { id: "cf-02", seccion_id: "sec-01", nombre: "Condición corporal", tipo: "SINGLE_SELECT", orden: 2, obligatorio: true, valor_inicial: N, reglas: N })] },
+  { title: "Opciones del campo de selección",
+    desc: "Se registran tres opciones: Flaca, Normal y Gorda. Cada opción es un registro; el resultado de la captura almacenará la referencia a la opción seleccionada.",
+    screen: () => fe(6, false, `<div class="grid2" style="align-items:start">${card("8", "Diseñador de campos", "Sección Pesaje.", designer(3))}
+      ${card("⚙", "Opciones de «Condición corporal»", "Ingresadas por el usuario, en el orden en que se presentarán.",
+        `<div class="stack" style="gap:8px">${fl("Opción 1", typed("Flaca"), "", "focus")}${fl("Opción 2", "Normal", "", "focus")}${fl("Opción 3", "Gorda", "", "focus")}</div>`)}</div>`),
+    ops: [ins("opcion_campo", { id: "op-01", campo_formulario_id: "cf-02", etiqueta: "Flaca", orden: 1, activa: true }),
+          ins("opcion_campo", { id: "op-02", campo_formulario_id: "cf-02", etiqueta: "Normal", orden: 2, activa: true }),
+          ins("opcion_campo", { id: "op-03", campo_formulario_id: "cf-02", etiqueta: "Gorda", orden: 3, activa: true })] },
+  { title: "Vista previa",
+    desc: "El sistema construye el formulario a partir de las tablas y lo presenta tal como lo verá el operador. La regla de validación se aplica: un peso de 1.200 kg no se acepta. Este paso no registra datos.",
+    screen: () => fe(7, false, `<div class="card enter"><div class="phone focus"><div class="ph-in"><div class="ph-top"><b>Pesaje</b><span>Vista previa</span></div><div class="ph-body">
+      <div class="ph-rfid">● Leer RFID para identificar el animal</div>
+      <div class="ph-ctx">Proceso · Tipo de actividad · Potrero (valores asignados por la tarea)</div>
+      <div class="ph-sec">Pesaje</div>
+      <div class="ph-f"><label>Peso (kg) <i>*</i></label><div class="ph-v">1.200</div><div class="ph-err">El valor debe estar entre 50 y 1.000</div></div>
+      <div class="ph-f"><label>Condición corporal <i>*</i></label><div class="ph-radio"><span>Flaca</span><span class="on">Normal</span><span>Gorda</span></div></div>
+      <div class="ph-btn">Guardar</div></div></div></div></div>`),
+    ops: [] },
+  { title: "Publicación de la versión 1",
+    desc: "El sistema valida la configuración y publica la versión. Se actualiza un único registro: la versión pasa a PUBLISHED, con usuario y fecha. A partir de este momento la versión es inmutable y queda disponible para Planificación.",
+    screen: () => fe(8, true, card("✓", "Validación previa a la publicación", "Sin observaciones.",
+      `<ul class="ok-list"><li>El formulario tiene una sección y dos campos</li><li>El campo de selección tiene opciones activas</li><li>RFID, Sexo y Edad siguen habilitados para búsqueda en Inventario</li><li>Cada filtro disponible corresponde a una clave de búsqueda</li></ul>
+       <div style="margin-top:12px" class="focus"><span class="badge pub" style="font-size:12px;padding:6px 12px">✓ Publicada · versión 1 · 30-oct-2026 10:15</span></div>`)),
+    ops: [upd("version_formulario", "ver-01", { estado: "PUBLISHED", publicado_por: "usr-laura", publicado_en: "2026-10-30 10:15" })],
+    event: "FormVersionPublished.v1 · notifica a Planificación que la versión ver-01 está disponible." }
+];
+
+const fmt = v => v === null || v === undefined ? "NULL" : typeof v === "object" ? JSON.stringify(v) : String(v);
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;");
+const firstStep = {};
+STEPS.forEach((s, i) => s.ops.forEach(o => { if (!(o.t in firstStep)) firstStep[o.t] = i + 1; }));
+
+function renderDB(k) {
+  const db = {}; TABLES.forEach(([t]) => db[t] = []);
+  for (let i = 0; i <= k; i++) for (const o of STEPS[i].ops) {
+    if (o.op === "INSERT") db[o.t].push({ ...o.row });
+    else Object.assign(db[o.t].find(r => r.id === o.id), o.set);
+  }
+  const ch = {};
+  for (const o of STEPS[k].ops) {
+    const c = ch[o.t] || (ch[o.t] = { ins: new Set(), upd: new Map(), ops: new Set() });
+    c.ops.add(o.op);
+    if (o.op === "INSERT") c.ins.add(o.row.id); else c.upd.set(o.id, new Set(Object.keys(o.set)));
+  }
+  let h = `<div class="db-h"><b>PostgreSQL · esquema <span>forms</span></b><div class="leg"><span class="op ins">INSERT · registro nuevo</span><span class="op upd">UPDATE · registro modificado</span></div></div>
+    <div class="db-sub">Las 8 tablas del esquema, en orden. ${Object.keys(ch).length ? "Resaltada, la tabla que se actualiza en este paso." : "En este paso no se registran datos."}</div>`;
+  if (STEPS[k].event) h += `<div class="evt enter">Evento: <b>${esc(STEPS[k].event)}</b></div>`;
+  TABLES.forEach(([t, what, cols], i) => {
+    const rows = db[t], c = ch[t];
+    const [sch, name] = t.split(".");
+    h += `<div class="tb ${c ? "now" : ""} ${rows.length ? "" : "empty"}" id="tb-${name}"><div class="tb-h"><span class="n">${i + 1}</span><span><span class="sch">${sch}.</span>${name}</span>
+      ${c ? [...c.ops].map(o => `<span class="op ${o === "INSERT" ? "ins" : "upd"}">${o}</span>`).join("") : ""}<span class="what">${what}</span><span class="cnt">${rows.length} fila${rows.length === 1 ? "" : "s"}</span></div>`;
+    if (!rows.length) h += `<div class="tb-e">Sin registros · se completa en el paso ${firstStep[t]}</div>`;
+    else h += `<div class="tb-b"><table><thead><tr>${cols.map(x => `<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r => {
+      const isIns = c && c.ins.has(r.id), u = c && c.upd.get(r.id);
+      return `<tr class="${isIns ? "ins" : u ? "updrow" : ""}">${cols.map(x => `<td class="${r[x] === null || r[x] === undefined ? "nul" : ""} ${r[x] && typeof r[x] === "object" ? "json" : ""} ${u && u.has(x) ? "upd" : ""}">${esc(fmt(r[x]))}</td>`).join("")}</tr>`;
+    }).join("")}</tbody></table></div>`;
+    h += `</div>`;
+  });
+  const el = document.getElementById("db");
+  el.innerHTML = h;
+  const now = el.querySelector(".tb.now");
+  el.scrollTop = 0;
+  if (now) {
+    const top = now.getBoundingClientRect().top - el.getBoundingClientRect().top - 70;
+    const fits = now.getBoundingClientRect().bottom <= el.getBoundingClientRect().bottom;
+    if (!fits) setTimeout(() => el.scrollTo({ top: Math.max(0, top), behavior: "smooth" }), 400);
+  }
+}
+
+let cur = 0, timer = null;
+const dots = document.getElementById("dots");
+dots.innerHTML = STEPS.map((s, i) => `<button class="dot" type="button" role="tab" aria-label="Paso ${i + 1}: ${esc(s.title)}" data-i="${i}"></button>`).join("");
+dots.querySelectorAll(".dot").forEach(d => d.addEventListener("click", () => { stop(); go(+d.dataset.i); }));
+function go(i) {
+  cur = Math.max(0, Math.min(STEPS.length - 1, i));
+  const s = STEPS[cur];
+  document.getElementById("eyebrow").textContent = `Paso ${cur + 1} de ${STEPS.length} · Formularios · Field Engine`;
+  document.getElementById("stitle").textContent = s.title;
+  document.getElementById("sdesc").textContent = s.desc;
+  dots.querySelectorAll(".dot").forEach((d, j) => { d.classList.toggle("on", j === cur); d.classList.toggle("done", j < cur); d.setAttribute("aria-selected", j === cur); });
+  const sc = document.getElementById("screen");
+  sc.innerHTML = s.screen(); sc.scrollTop = 0;
+  sc.querySelectorAll(".typed").forEach(el => {
+    const txt = el.dataset.text; let n = 0;
+    const iv = setInterval(() => { el.textContent = txt.slice(0, ++n); if (n >= txt.length) { clearInterval(iv); el.classList.add("done"); } }, 55);
+  });
+  renderDB(cur);
+  document.getElementById("prev").disabled = cur === 0;
+  document.getElementById("next").disabled = cur === STEPS.length - 1;
+  try { history.replaceState(null, "", "#paso-" + (cur + 1)); } catch (e) {}
+}
+function stop() { clearInterval(timer); timer = null; document.getElementById("play").textContent = "▶ Reproducir"; }
+document.getElementById("prev").addEventListener("click", () => { stop(); go(cur - 1); });
+document.getElementById("next").addEventListener("click", () => { stop(); go(cur + 1); });
+document.getElementById("play").addEventListener("click", () => {
+  if (timer) return stop();
+  document.getElementById("play").textContent = "❚❚ Pausar";
+  if (cur === STEPS.length - 1) go(0);
+  timer = setInterval(() => { if (cur >= STEPS.length - 1) return stop(); go(cur + 1); }, 8000);
+});
+document.addEventListener("keydown", e => { if (e.key === "ArrowRight") { stop(); go(cur + 1); } if (e.key === "ArrowLeft") { stop(); go(cur - 1); } });
+window.__go = go;
+const m = /^#paso-(\d+)$/.exec(location.hash);
+go(m ? +m[1] - 1 : 0);
+</script>
+</body>
+</html>
