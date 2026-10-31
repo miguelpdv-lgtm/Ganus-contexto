@@ -3,7 +3,7 @@
 > Este archivo **solo se actualiza cuando el usuario lo indica** (ver `CLAUDE.md` §5). Es lo primero que se lee al
 > empezar una conversación.
 
-**Última actualización:** 2026-10-30 — mockup de presentación del formulario «Pesaje» publicado en `docs/` para desplegar en Vercel.
+**Última actualización:** 2026-10-31 — el mockup «Pesaje» se abre desde GitHub Pages (`index.html` en la raíz redirige a `docs/`).
 
 ## Contexto de trabajo
 
@@ -33,7 +33,7 @@
 | Registro de decisiones pendientes | 26 decisiones abiertas | `contexto/decisiones-pendientes.md` |
 | Alcance funcional de Formularios | Documento compartible; base 04 v1.3 | [Claude Docs](https://claude.ai/artifact/H8nfBYqGaC8FBA7hV8KKPV) |
 | Alcance funcional de Planificación | Documento compartible; base 05 v1.0 | [Claude Docs](https://claude.ai/artifact/YbJCVMjdaJgHbN2cpeAqxL) |
-| Mockup de presentación: formulario «Pesaje» (creación y publicación, 8 tablas de `forms`) | Para presentar; propuesta de modelo de 8 tablas, aún no registrada en `modelo-datos/` | `docs/index.html` (Vercel, ver `vercel.json`) |
+| Mockup de presentación: formulario «Pesaje» (creación y publicación, 8 tablas de `forms`) | Para presentar; propuesta de modelo de 8 tablas, aún no registrada en `modelo-datos/` | `docs/index.html` · GitHub Pages: https://miguelpdv-lgtm.github.io/Ganus-contexto/ (también Vercel, ver `vercel.json`) |
 
 ## Próximos pasos (indicados por el usuario)
 

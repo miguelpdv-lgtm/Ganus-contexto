@@ -14,6 +14,13 @@ Formato de cada entrada:
 
 ---
 
+## 2026-10-31 — El mockup «Pesaje» se abre desde GitHub Pages
+- Qué: por indicación del usuario. GitHub Pages publica la raíz de esta rama y mostraba el `README.md` en lugar del
+  mockup, que vive en `docs/`. Se agrega `index.html` en la raíz, que redirige a `docs/`. El mockup sigue en un solo
+  archivo y `vercel.json` no cambia.
+- Archivos: `index.html`, `contexto/estado-actual.md`.
+- Rama / Jira: `claude/intelligent-ramanujan-1skub1` (rama publicada en https://miguelpdv-lgtm.github.io/Ganus-contexto/).
+
 ## 2026-10-30 — Mockup de presentación del formulario «Pesaje»
 - Qué: por indicación del usuario se agrega una página HTML de presentación que muestra, paso a paso, la creación y
   publicación del formulario «Pesaje» y los registros que se guardan en cada una de las 8 tablas del esquema `forms`
