@@ -14,6 +14,12 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-09 — Mockup de 6 tablas publicado en GitHub Pages
+- Qué: por indicación del usuario, la rama que publica GitHub Pages se adelanta hasta la rama de trabajo, así que
+  https://miguelpdv-lgtm.github.io/Ganus-contexto/ muestra el mockup «Pesaje» con las 6 tablas del modelo v1.
+- Archivos: `contexto/estado-actual.md`, `contexto/bitacora.md`.
+- Rama / Jira: `claude/funny-brahmagupta-8pwmhv` y `claude/intelligent-ramanujan-1skub1`.
+
 ## 2026-11-09 — Modelo de datos v1 de `forms` y `planning`
 - Qué: por indicación del usuario. Se listan los requisitos del esquema `planning` (05, 10, 09C), se propone un
   modelo mínimo y se audita con un ejercicio: una tarea masiva de pesaje con el formulario «Pesaje». El usuario
