@@ -43,8 +43,9 @@ con qué reglas. Planificación lo usa para armar la tarea y Mobile lo ejecuta s
 
 ## Estructura (04 §7, §19)
 ```
-FORMULARIO → VERSIÓN → CLAVES (búsqueda + contexto) + FILTROS DISPONIBLES + SECCIONES → CAMPOS → VALIDACIONES / CATÁLOGOS
+FORMULARIO → VERSIÓN (tipo de activo) → CLAVES (búsqueda + contexto, con marca de filtro) + SECCIONES → CAMPOS → VALIDACIONES / CATÁLOGOS
 ```
+Modelo de datos: `modelo-datos/formularios.md` (6 tablas, v1).
 
 ### 1. Claves de búsqueda (04 §6.2, §8)
 - Son dimensiones del activo que sirven para **localizar o segmentar** la población: RFID, ID GANUS, especie, raza,
@@ -52,19 +53,23 @@ FORMULARIO → VERSIÓN → CLAVES (búsqueda + contexto) + FILTROS DISPONIBLES 
 - **Formularios no las crea.** Solo puede elegir atributos que Inventario publicó con "aptitud de búsqueda".
 - Texto libre, notas, fotos, videos y documentos no son claves.
 - Una clave de búsqueda **no es un campo de captura**.
-- Pendiente: si un formulario aplica a varios tipos de activo (DP-10).
+- Cada versión declara **un tipo de activo** (`tipo_activo_id`), obligatorio para publicar: un formulario por tipo de
+  activo (DP-10, acordado; por confirmar con Producto). Planificación lo usa para pedir la población.
 
 ### 2. Claves de contexto (04 §6.3, §9)
-- Dimensiones que explican el resultado: proceso, tipo de actividad, segmentación física (tipo de espacio, espacio,
-  jerarquía padre/hijo), según el 04.
-- Referencian maestros de Organización; no se copian.
-- **Conflicto abierto (DP-02):** la v3.1 lista otras claves (activo principal, responsable, ubicación, fecha,
-  código) y D-04 dice que el formulario no asigna proceso ni actividad. Hasta resolverlo, se modelan como referencias
-  a dimensiones cuyo **valor se resuelve en la tarea**, nunca como un valor fijo de la plantilla.
+- Dimensiones que explican el resultado (04 §9). Referencian maestros de Organización; no se copian.
+- **Acordado (DP-02, por confirmar con Producto):** proceso y tipo de actividad **no** se declaran como claves: toda
+  tarea los tiene y su valor lo fija la tarea (compatible con D-04). El formulario declara solo los niveles de la
+  jerarquía de espacios (por ejemplo, Potrero) y, cuando se definan, otros contextos autorizados.
+- El valor de cada contexto se resuelve **en la tarea**, nunca en la plantilla ni en cada captura (04 §22, 09C §10.4).
+- La v3.1 lista otras claves (activo principal, responsable, ubicación, fecha, código): sigue el conflicto DP-01.
 
 ### 3. Filtros disponibles (04 §6.4, §10)
-- El formulario declara **sobre qué dimensiones** se puede filtrar (atributos de Inventario, jerarquía de espacios).
-- Planificación pone los operadores y los valores concretos.
+- El formulario declara **sobre qué dimensiones** se puede filtrar marcando `es_filtro` en sus claves de búsqueda o de
+  contexto (04 §10: los filtros «no son un maestro independiente»). No hay una tabla aparte de filtros.
+- Una clave puede servir para identificar y no para filtrar (RFID suele tener `es_filtro = false`).
+- Planificación pone los operadores y los valores concretos, y guarda la dimensión maestra (`atributo_id` o nivel de
+  espacio), no el id de la fila del formulario.
 - **CLAVE ≠ FILTRO:** la clave es la dimensión; el filtro es la condición aplicada.
 
 ### 4. Secciones y orden (04 §14)
@@ -76,12 +81,12 @@ FORMULARIO → VERSIÓN → CLAVES (búsqueda + contexto) + FILTROS DISPONIBLES 
 
 | Propiedad | Definición |
 | --- | --- |
-| `fieldId` | Identificador estable (UUID). Se conserva entre versiones si el campo es el mismo |
-| `key` | Nombre técnico único dentro de la versión (`peso`, `presenta_anomalia`) |
+| `fieldId` | Identificador del campo en esta versión (UUID). Cada versión tiene ids nuevos |
+| `key` | Código del campo (`campo_formulario.codigo`): único en la versión y **estable entre versiones** (`peso`, `presenta_anomalia`) |
 | `label` | Nombre funcional que ve el usuario |
 | `type` | Uno de los 14 tipos de la tabla siguiente |
 | `order` | Posición dentro de la sección |
-| `required` | `ALWAYS`, `OPTIONAL` o `CONDITIONAL` (04 §15) |
+| `required` | `ALWAYS`, `OPTIONAL` o `CONDITIONAL` (04 §15). Se deriva de `obligatorio` y de `condiciones.obligatorio_si` |
 | `requiredWhen` / `visibleWhen` | Condición, solo si aplica (DP-11) |
 | `preload` | Origen del valor precargado: Inventario, tarea, contexto o configuración (04 §11) |
 | `defaultValue` | Valor inicial |
@@ -122,8 +127,10 @@ Unidad de medida para `INTEGER` y `DECIMAL`: no está definida en el 04 (**DP-12
 ### 8. Catálogos (04 §17)
 - `MASTER`: se referencia un catálogo de otro dominio; no se copia.
 - `LOCAL`: opciones propias del formulario.
-- Una opción usada en resultados históricos no se borra: se desactiva.
-- Las opciones se guardan con la versión, para que los resultados viejos sigan siendo interpretables.
+- Las opciones se guardan con la versión, para que los resultados viejos sigan siendo interpretables. Como la versión
+  publicada no cambia, «desactivar» una opción es no copiarla a la versión siguiente; la anterior la conserva.
+- Cada campo y cada opción tienen un `codigo` estable entre versiones (`peso_kg`, `normal`). El resultado guarda el
+  código de la opción.
 
 ## Lenguaje de condiciones — Propuesta (DP-11, pendiente de aprobación)
 Gramática mínima, igual en web y móvil:
@@ -149,19 +156,15 @@ no reemplaza el modelo relacional (10 §33).
   "code": "EVAL-REPRO",
   "name": "Evaluación reproductiva",
   "status": "PUBLISHED",
+  "assetTypeId": "uuid",
   "publishedAt": "2026-10-21T15:00:00Z",
   "searchKeys": [
-    { "keyId": "uuid", "attributeRef": "inventory:attr:sexo", "label": "Sexo" },
-    { "keyId": "uuid", "attributeRef": "inventory:attr:edad_meses", "label": "Edad (meses)" }
+    { "attributeRef": "inventory:attr:rfid", "label": "RFID", "isFilter": false },
+    { "attributeRef": "inventory:attr:sexo", "label": "Sexo", "isFilter": true },
+    { "attributeRef": "inventory:attr:edad_meses", "label": "Edad (meses)", "isFilter": true }
   ],
   "contextKeys": [
-    { "keyId": "uuid", "dimension": "PROCESS", "label": "Proceso" },
-    { "keyId": "uuid", "dimension": "ACTIVITY_TYPE", "label": "Actividad" },
-    { "keyId": "uuid", "dimension": "SPACE", "label": "Potrero" }
-  ],
-  "availableFilters": [
-    { "filterId": "uuid", "source": "INVENTORY_ATTRIBUTE", "ref": "inventory:attr:sexo" },
-    { "filterId": "uuid", "source": "ORGANIZATION_SPACE_HIERARCHY", "ref": "organization:space" }
+    { "spaceLevelRef": "organization:space-level:potrero", "label": "Potrero", "isFilter": true }
   ],
   "sections": [
     {
@@ -194,12 +197,14 @@ no reemplaza el modelo relacional (10 §33).
   ],
   "catalogs": [
     { "catalogId": "uuid", "kind": "LOCAL", "options": [
-      { "optionId": "uuid", "code": "QUISTE", "label": "Quiste", "active": true },
-      { "optionId": "uuid", "code": "OTRO", "label": "Otro", "active": true } ] }
+      { "optionId": "uuid", "code": "QUISTE", "label": "Quiste" },
+      { "optionId": "uuid", "code": "OTRO", "label": "Otro" } ] }
   ]
 }
 ```
 Los valores de rango y los catálogos del ejemplo son ilustrativos. El caso funcional es el del 04 §30.
+
+Las etiquetas (`label`) de claves se toman de Inventario u Organización al generar el contrato; `forms` no las copia.
 
 Reglas del contrato:
 - El renderer **no** agrega, quita ni reordena campos.
@@ -208,23 +213,21 @@ Reglas del contrato:
 
 ## Persistencia (10 §9)
 
-| Concepto | Tabla en `forms` |
+| Concepto (10 §9) | Tabla en `forms` (`modelo-datos/formularios.md`) |
 | --- | --- |
-| Formulario (identidad estable) | `form` |
-| Versión | `form_version` |
-| Sección | `form_section` |
-| Campo | `form_field` |
-| Validación | `form_field_validation` |
-| Clave de búsqueda o de contexto | `form_key` |
-| Catálogo y opciones | `form_catalog`, `form_catalog_option` |
-| Registro de publicación | `form_publication` |
-Índices sugeridos: `form_version (form_id, version_no, status)`, `form_field (form_version_id, order)` (10 §27).
+| Formulario (identidad estable) | `formulario` |
+| Versión, tipo de activo y registro de publicación | `version_formulario` |
+| Sección | `seccion_formulario` |
+| Campo, validaciones (`reglas`), condiciones y precarga | `campo_formulario` |
+| Clave de búsqueda o de contexto, con marca de filtro | `clave_formulario` |
+| Opciones locales (los catálogos maestros se referencian en el campo) | `opcion_campo` |
+Índices sugeridos: `version_formulario (formulario_id, numero_version, estado)`, `campo_formulario (seccion_id, orden)` (10 §27).
 
 ## Procedimiento (04 §20, pasos 1 a 8)
 1. Un usuario autorizado (Administrador según 09F §3; matriz exacta en DP-23) crea la plantilla en Borrador.
-2. Elige las claves de búsqueda entre los atributos que Inventario publicó como aptos.
-3. Elige las claves de contexto desde Organización (DP-02).
-4. Declara los filtros disponibles.
+2. Indica el tipo de activo y elige las claves de búsqueda entre los atributos que Inventario publicó como aptos.
+3. Elige los niveles de espacio que serán contexto, desde Organización (DP-02).
+4. Marca qué claves sirven como filtro (`es_filtro`).
 5. Construye secciones y campos uno a uno.
 6. Define tipo, orden, obligatoriedad, precarga, condiciones y validaciones.
 7. Configura catálogos.
@@ -240,8 +243,8 @@ Reglas del contrato:
 - Poner lógica de negocio en componentes visuales.
 
 ## Decisiones pendientes que afectan esta skill
-DP-01 (documento que manda), DP-02 (claves de contexto), DP-08 (mapeo campo → atributo), DP-10 (varios tipos de
-activo), DP-11 (condiciones), DP-12 (unidad y límites de evidencia), DP-13 (canal web), DP-14 (mecanismo de captura),
+DP-01 (documento que manda), DP-02 (claves de contexto: acordada, por confirmar con Producto), DP-08 (mapeo campo →
+atributo), DP-10 (tipo de activo acordado; potrero y tareas sin activo abiertos), DP-11 (condiciones), DP-12 (unidad y límites de evidencia), DP-13 (canal web), DP-14 (mecanismo de captura),
 DP-19 (formulario de alerta), DP-23 (permisos), DP-26 (definir estructuras no estandarizables con Formularios).
 
 ## Verificación (04 §27)

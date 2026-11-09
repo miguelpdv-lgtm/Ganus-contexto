@@ -14,6 +14,29 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-09 — Modelo de datos v1 de `forms` y `planning`
+- Qué: por indicación del usuario. Se listan los requisitos del esquema `planning` (05, 10, 09C), se propone un
+  modelo mínimo y se audita con un ejercicio: una tarea masiva de pesaje con el formulario «Pesaje». El usuario
+  acuerda 7 decisiones y los ajustes que resultan:
+  1. Un formulario por tipo de activo (`version_formulario.tipo_activo_id`). DP-10 parcial.
+  2. Sin tabla de filtros disponibles: marca `es_filtro` en las claves; los criterios de la tarea guardan la
+     dimensión maestra.
+  3. Proceso y actividad no son claves de contexto (DP-02 acordada, por confirmar con Producto).
+  4. El contexto se fija en la tarea, no en cada captura.
+  5. El espacio de la tarea es dónde se trabaja; la ubicación de la población es un criterio.
+  6. Sin condiciones de la tarea hasta definirlas: se abre DP-27.
+  7. Cada causa del catálogo indica si exige observación y evidencia (DP-20).
+  Resultado: `forms` pasa a 6 tablas (`clave_formulario` reemplaza claves de búsqueda, de contexto y filtros; código
+  estable en campos y opciones) y `planning` de 17 a 6 tablas (`tarea`, `activo_tarea`, `captura`,
+  `valor_captura`, `alerta_campo`, `historial`). Se actualizan las skills 6 a 11, 13 y 14, el mockup «Pesaje»
+  (6 tablas) y se registran dos observaciones a STAGING y Mobile sobre los contratos 09C §10.3 y §10.5.
+- Archivos: `modelo-datos/formularios.md`, `modelo-datos/planificacion.md`, `modelo-datos/README.md`,
+  `contexto/decisiones-pendientes.md`, `contexto/estado-actual.md`, `docs/index.html`, `README.md`, `CLAUDE.md`
+  (mapa), skills `disenar-plantilla-formulario`, `versionar-formulario`, `calcular-dataset-poblacion`,
+  `validar-publicacion-tarea`, `gestionar-estados-tarea`, `procesar-alerta-campo`, `construir-paquete-trabajo` y
+  `procesar-sincronizacion-resultados`.
+- Rama / Jira: `claude/funny-brahmagupta-8pwmhv`.
+
 ## 2026-10-31 — El mockup «Pesaje» se abre desde GitHub Pages
 - Qué: por indicación del usuario. GitHub Pages publica la raíz de esta rama y mostraba el `README.md` en lugar del
   mockup, que vive en `docs/`. Se agrega `index.html` en la raíz, que redirige a `docs/`. El mockup sigue en un solo

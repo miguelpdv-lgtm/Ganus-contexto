@@ -44,7 +44,8 @@ cuando exista, usuario, fecha y hora, y evidencias (foto, video, nota de voz, te
 2. Las alertas llegan por STAGING con prioridad de transmisión; offline se guardan en cola prioritaria (06 §19).
 3. Una alerta se conserva aunque la tarea relacionada siga abierta (09C §9, CI-010).
 4. **Ninguna alerta se convierte en tarea automáticamente** (09C §9). En el MVP la conversión es manual (v3.1 §9.5).
-5. Al convertir, la alerta queda como origen de la tarea (`alert_task_link`) (05 regla 27).
+5. Al convertir, la alerta queda como origen de la tarea: `tarea.alerta_origen_id` (equivale a `alert_task_link`
+   del 10 §20). Una alerta puede originar varias tareas (05 regla 27).
 6. **Crear la tarea no cierra la alerta**: su estado refleja si fue atendida, convertida, resuelta o descartada (05 §25).
 7. La tarea creada sigue el flujo normal completo: formulario → dataset → validar → publicar (05 §25).
 8. Puede ser unitaria o masiva y asignarse a otro responsable (05 §25).
@@ -57,8 +58,9 @@ ALERTA → REVISAR → DECIDIR → CREAR TAREA → FORMULARIO → DATASET → VA
 1. El supervisor abre la alerta y su evidencia.
 2. Decide: atender, convertir en tarea, resolver o descartar.
 3. Si convierte: se abre el asistente de tarea en Borrador, precargando contexto (finca, espacio, activo si existe).
-4. Al guardar la tarea se crea `alert_task_link`.
-5. La alerta cambia de estado según la decisión (ver DP-06).
+4. Al guardar la tarea se llena `tarea.alerta_origen_id`.
+5. La alerta cambia de estado según la decisión y cada decisión queda en `planning.historial` (ver DP-06).
+Modelo: `modelo-datos/planificacion.md` (`alerta_campo`, `historial`).
 
 ## Trazabilidad (05 §34)
 Alerta → origen, usuario y contexto → decisión → tarea relacionada → resultado.

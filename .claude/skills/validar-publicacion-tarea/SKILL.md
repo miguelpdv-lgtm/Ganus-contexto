@@ -61,7 +61,7 @@ El resumen debe ser visual y ejecutivo, no una pantalla técnica (05 §33). La a
 4. Al confirmar, en una transacción:
    - congelar el dataset (`calcular-dataset-poblacion`);
    - cambiar el estado según `gestionar-estados-tarea`;
-   - registrar la condición de carga, el actor y la fecha;
+   - registrar la condición de carga, el actor y la fecha en `planning.historial` (evento de publicación);
    - generar el paquete y el evento por Outbox (`construir-paquete-trabajo`).
 5. Registrar auditoría de validación, publicación y asignación (05 §35).
 
@@ -77,6 +77,8 @@ El resumen debe ser visual y ejecutivo, no una pantalla técnica (05 §33). La a
 - **DP-05:** si "Confirmar y publicar" lleva la tarea directo a Disponible para campo o pasa por Validada y Programada
   como acciones separadas.
 - **DP-23:** qué roles pueden publicar.
+- **DP-27:** qué son las condiciones de la tarea y las «condiciones de cierre» del resumen. Hasta resolverlo: el
+  bloque «Resultado esperado» muestra cantidad y tiempos; no se inventan condiciones.
 
 ## Verificación
 - Cada verificación bloqueante tiene su prueba: falla → no se publica y no hay evento.

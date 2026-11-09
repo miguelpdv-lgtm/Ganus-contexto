@@ -132,7 +132,7 @@ resume los archivos cambiados y completa el checklist de PR (CONST §21).
 | `README.md` | Guía para personas: uso, estructura, abreviaturas e índice de skills |
 | `contexto/estado-actual.md` | Rama, Jira, trabajo en curso y entregables |
 | `contexto/bitacora.md` | Registro de cambios hechos con este repositorio |
-| `contexto/decisiones-pendientes.md` | Decisiones abiertas DP-01 a DP-25 |
+| `contexto/decisiones-pendientes.md` | Decisiones pendientes DP-01 a DP-27 |
 | `modelo-datos/` | Modelo de datos de `forms` y `planning` (diagramas Mermaid) y convenciones |
 | `fuentes/` | Documentos oficiales del proyecto en Markdown (solo lectura) |
 | `.claude/skills/` | Las 14 skills del proyecto |

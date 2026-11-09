@@ -27,8 +27,8 @@ recordarse queda en `contexto/`.
 | [`CLAUDE.md`](CLAUDE.md) | Rol, alcance, memoria, forma de actualizar y plantilla de prompts |
 | [`contexto/estado-actual.md`](contexto/estado-actual.md) | Rama, Jira, trabajo en curso y entregables |
 | [`contexto/bitacora.md`](contexto/bitacora.md) | Registro de cambios |
-| [`contexto/decisiones-pendientes.md`](contexto/decisiones-pendientes.md) | Decisiones abiertas (DP-01 a DP-25) |
-| [`modelo-datos/`](modelo-datos/) | Modelo de datos de `forms` y `planning` y convenciones comunes |
+| [`contexto/decisiones-pendientes.md`](contexto/decisiones-pendientes.md) | Decisiones pendientes (DP-01 a DP-27) |
+| [`modelo-datos/`](modelo-datos/) | Modelo de datos v1 de `forms` (6 tablas) y `planning` (6 tablas) y convenciones comunes |
 | [`fuentes/`](fuentes/) | Documentos oficiales en Markdown (solo lectura) |
 | [`.claude/skills/`](.claude/skills/) | Skills del proyecto |
 

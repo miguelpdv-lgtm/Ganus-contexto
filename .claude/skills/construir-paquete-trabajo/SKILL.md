@@ -80,7 +80,8 @@ Notas:
 - `population[]` es una **instantánea de solo lectura** (AssetSnapshot de Inventario, 09C §5). Solo lleva los datos que
   la tarea necesita; no la ficha completa del activo.
 - `form` lleva la definición completa porque el móvil trabaja offline.
-- Las causas de cancelación vienen del catálogo que se defina en DP-20.
+- Las causas de cancelación vienen del catálogo que se defina en DP-20; cada causa viaja con sus marcas «requiere
+  observación» y «requiere evidencia».
 
 ## Cuándo se genera (09C §12.2)
 1. Planificación valida tarea, formulario y población (`validar-publicacion-tarea`).

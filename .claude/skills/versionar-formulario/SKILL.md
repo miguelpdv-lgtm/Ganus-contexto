@@ -57,14 +57,16 @@ Bloquean la publicación:
 
 ### Publicar
 1. Ejecutar la validación anterior.
-2. En una transacción: cambiar la versión a Publicado, registrar `form_publication` (actor, fecha) y escribir
-   FormVersionPublished.v1 en el Outbox.
+2. En una transacción: cambiar la versión a Publicado con `publicado_por` y `publicado_en` (no hay tabla aparte de
+   publicaciones) y escribir FormVersionPublished.v1 en el Outbox.
 3. A partir de ese momento cualquier intento de edición devuelve CONFLICT.
 
 ### Crear nueva versión
 1. Tomar la última versión publicada.
-2. Copiar secciones, campos, validaciones, claves y catálogos a una versión nueva en Borrador (`versionNo + 1`).
-3. Conservar los `fieldId` de los campos que no cambian de significado.
+2. Copiar el tipo de activo, las claves, las secciones, los campos y las opciones a una versión nueva en Borrador
+   (`versionNo + 1`), con ids nuevos.
+3. Conservar el `codigo` de los campos y opciones que no cambian de significado: es lo que permite comparar
+   resultados entre versiones. Una opción que ya no se ofrece simplemente no se copia.
 
 ### Obsoletar
 1. Un usuario autorizado (DP-23) marca la versión como Obsoleto.
@@ -76,7 +78,9 @@ Bloquean la publicación:
 { "formId": "uuid", "formVersionId": "uuid", "status": "PUBLISHED",
   "context": { "processId": "...", "activityTypeId": "..." } }
 ```
-El bloque `context` depende de DP-02. El evento FormVersionPublished.v1 lo consume Planificación.
+Según DP-02 (acordada, por confirmar con Producto), proceso y actividad no son parte del formulario: los fija la
+tarea. El evento debería llevar el tipo de activo y los niveles de contexto; el bloque `context` del 09C §10.3 queda
+como observación a STAGING. El evento FormVersionPublished.v1 lo consume Planificación.
 
 ## Prohibido
 - Editar o borrar una versión publicada.

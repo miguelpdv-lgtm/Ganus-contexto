@@ -50,6 +50,14 @@ Para **Organización** (información recibida el 2026-10-27):
    (02 §11). Formularios la necesita para ofrecer los procesos como claves de contexto, y Planificación para listar
    solo los procesos de la finca al crear una tarea (05 §10, paso 1). Dirigida al responsable de Organización.
 
+Para **STAGING y Mobile** (ejercicio «Pesaje», 2026-11-09):
+1. El contrato `TaskExecutionResult` (09C §10.5) no tiene campos para la **causa** ni la **observación** de una no
+   ejecución o cancelación, que el 05 §18 exige. Planificación los guarda en `planning.captura` (`causa_codigo`,
+   `observacion`). Dirigida a los responsables de STAGING y Mobile.
+2. El contrato `FormVersionPublished` (09C §10.3) lleva `context: {processId, activityTypeId}`. Con DP-02 acordada,
+   el formulario no tiene proceso ni actividad (los fija la tarea); el evento debería llevar el tipo de activo
+   (`assetTypeId`) y los niveles de espacio de contexto. Dirigida al responsable de STAGING.
+
 Del borrador de **Ciclo de vida**:
 1. `tarea_etapa_ciclo_vida` es una **tarea referencial**: guía a Planificación, pero no crea tareas solas
    (CONST §7.2, 10 §8). Planificación necesita un contrato para consultarlas.

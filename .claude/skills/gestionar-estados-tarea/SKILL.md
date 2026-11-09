@@ -81,8 +81,9 @@ Reglas:
 ## Reglas de implementación
 1. Máquina de estados **explícita en el dominio** (05 §35): una tabla de transiciones permitidas, no `if` dispersos.
 2. Una transición inválida → error de dominio, traducido a CONFLICT (09C §4.2).
-3. Cada cambio se guarda en `task_state_history`: estado anterior, nuevo, actor, fecha y hora, origen
-   (WEB, MOBILE, SYSTEM), causa si aplica y `correlationId`.
+3. Cada cambio se guarda en `planning.historial` (equivale a `task_state_history`): estado nuevo, actor, fecha y
+   hora, origen (WEB, MOBILE, SYSTEM) y causa en `razon` si aplica. El estado anterior es la fila previa de la misma
+   tarea. Los eventos que no cambian el estado (cálculo del dataset, asignación, reprogramación) usan `tipo`.
 4. Cada cambio emite TaskStateChanged.v1 por Outbox, más el evento específico cuando corresponda (TaskPublished,
    TaskStarted, TaskCompleted, TaskValidated).
 5. La tarea **no se cierra por recibir resultados**; respeta el flujo de validación (09C §9).
@@ -103,4 +104,4 @@ DP-05 (disparadores y cierre), DP-04 (estados por ocurrencia recurrente), DP-17 
 - Toda transición fuera de la tabla → CONFLICT, sin cambios.
 - Cancelar un activo deja el resto de la tarea igual.
 - Recibir todos los resultados no cierra la tarea.
-- Cada cambio deja una fila en `task_state_history` y un evento.
+- Cada cambio deja una fila en `historial` y un evento.

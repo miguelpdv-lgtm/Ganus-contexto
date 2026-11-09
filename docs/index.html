@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <style>
-/* Layout: shell de GANUS; a la izquierda la pantalla del constructor, a la derecha las 8 tablas de forms en orden. Tema claro único, como el frontend real. */
+/* Layout: shell de GANUS; a la izquierda la pantalla del constructor, a la derecha las 6 tablas de forms en orden. Tema claro único, como el frontend real. */
 :root {
   color-scheme: light;
   --navy: #082b55; --side: #070e27; --green: #76b82a; --green-d: #5c9a1c; --green-soft: #eaf5dd;
@@ -223,20 +223,21 @@ button:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
 </div>
 
 <script>
-/* Las 8 tablas de forms, en el orden en que se van llenando */
+/* Las 6 tablas de forms (modelo v1), en el orden en que se van llenando */
 const TABLES = [
-  ["forms.formulario", "Identidad del formulario", ["id","organizacion_id","nombre","creado_por","creado_en"]],
-  ["forms.version_formulario", "Versiones y estado", ["id","formulario_id","numero_version","estado","creado_en","publicado_por","publicado_en"]],
-  ["forms.clave_busqueda", "Atributos de Inventario para búsqueda", ["id","version_formulario_id","atributo_id","nombre"]],
-  ["forms.clave_contexto", "Dimensiones de contexto del resultado", ["id","version_formulario_id","dimension","tipo_espacio_id","nombre"]],
-  ["forms.filtro_disponible", "Dimensiones habilitadas para filtrar", ["id","version_formulario_id","origen","referencia_id","nombre"]],
+  ["forms.formulario", "Identidad del formulario", ["id","organizacion_id","nombre"]],
+  ["forms.version_formulario", "Versión, tipo de activo y estado", ["id","formulario_id","numero_version","estado","tipo_activo_id","revision","creado_por","creado_en","publicado_por","publicado_en","obsoleto_en"]],
+  ["forms.clave_formulario", "Claves de búsqueda y de contexto, con marca de filtro", ["version_formulario_id","tipo","referencia_id","es_filtro"]],
   ["forms.seccion_formulario", "Secciones", ["id","version_formulario_id","titulo","orden"]],
-  ["forms.campo_formulario", "Campos de captura", ["id","seccion_id","nombre","tipo","orden","obligatorio","valor_inicial","reglas"]],
-  ["forms.opcion_campo", "Opciones de los campos de selección", ["id","campo_formulario_id","etiqueta","orden","activa"]]
+  ["forms.campo_formulario", "Campos de captura", ["id","seccion_id","codigo","nombre","tipo","orden","obligatorio","ayuda","valor_inicial","reglas","condiciones","catalogo_maestro_id"]],
+  ["forms.opcion_campo", "Opciones de los campos de selección", ["id","campo_formulario_id","codigo","etiqueta","orden"]]
 ];
 const N = null;
 const ins = (t, row) => ({ op: "INSERT", t: "forms." + t, row });
 const upd = (t, id, set) => ({ op: "UPDATE", t: "forms." + t, id, set });
+/* Clave de fila: el id, o la PK compuesta de clave_formulario */
+const rk = r => r.id ?? `${r.tipo}:${r.referencia_id}`;
+const kf = (tipo, referencia_id, es_filtro = false) => ({ version_formulario_id: "ver-01", tipo, referencia_id, es_filtro });
 
 const fl = (label, val, hint = "", cls = "") => `<div class="fl ${cls}"><label>${label}</label><div class="inp"><span>${val}</span>${hint}</div></div>`;
 const H = { org: t => `<span class="hint h-org">${t}</span>`, inv: t => `<span class="hint h-inv">${t}</span>`, fij: t => `<span class="hint h-fij">${t}</span>`, usr: t => `<span class="hint h-usr">${t}</span>` };
@@ -253,9 +254,9 @@ const atrBusqueda = sel => `<div class="xl"><div class="xl-h">ATRIBUTOS DEL TIPO
   <thead><tr><th>Atributo</th><th>Tipo de dato</th><th>Apto para búsqueda</th><th>Clave de búsqueda</th></tr></thead><tbody>
   ${ATR.map(([a, t, apto]) => { const s = sel.includes(a); return `<tr><td class="${s ? "sel" : !apto ? "no" : ""}">${a}</td><td class="${s ? "sel" : !apto ? "no" : ""}">${t}</td><td class="${s ? "sel" : !apto ? "no" : ""}">${apto ? "Sí" : "No"}</td><td class="chk ${s ? "sel" : ""}">${s ? "✓ Seleccionada" : apto ? "—" : "No disponible"}</td></tr>`; }).join("")}
   </tbody></table></div>`;
-const atrFiltro = sel => `<div class="xl"><div class="xl-h">CLAVES DE BÚSQUEDA DE ESTE FORMULARIO</div><table>
-  <thead><tr><th>Dimensión</th><th>Uso</th><th>Filtro disponible</th></tr></thead><tbody>
-  ${[["RFID", "Identificar un animal específico"], ["Sexo", "Segmentar la población"], ["Edad (meses)", "Segmentar la población"]].map(([a, u]) => { const s = sel.includes(a); return `<tr><td class="${s ? "sel" : ""}">${a}</td><td class="${s ? "sel" : ""}">${u}</td><td class="chk ${s ? "sel" : ""}">${s ? "✓ Habilitado" : "—"}</td></tr>`; }).join("")}
+const atrFiltro = sel => `<div class="xl"><div class="xl-h">CLAVES DE ESTE FORMULARIO · MARCA es_filtro</div><table>
+  <thead><tr><th>Clave</th><th>Tipo</th><th>Uso</th><th>Filtro</th></tr></thead><tbody>
+  ${[["RFID", "Búsqueda", "Identificar un animal específico"], ["Sexo", "Búsqueda", "Segmentar la población"], ["Edad (meses)", "Búsqueda", "Segmentar la población"], ["Potrero", "Contexto", "Limitar la población por ubicación"]].map(([a, t, u]) => { const s = sel.includes(a); return `<tr><td class="${s ? "sel" : ""}">${a}</td><td class="${s ? "sel" : ""}">${t}</td><td class="${s ? "sel" : ""}">${u}</td><td class="chk ${s ? "sel" : ""}">${s ? "✓ es_filtro" : "—"}</td></tr>`; }).join("")}
   </tbody></table></div>`;
 const designer = sel => `<div class="sec"><h3>Pesaje <small>sección 1</small></h3>
   ${sel >= 1 ? `<div class="fld ${sel === 1 ? "sel focus" : ""}"><div class="t">DEC</div><div><b>Peso (kg)</b><span>DECIMAL · entre 50 y 1.000</span></div><span class="tag">Obligatorio</span></div>` : ""}
@@ -263,36 +264,35 @@ const designer = sel => `<div class="sec"><h3>Pesaje <small>sección 1</small></
 
 const STEPS = [
   { title: "Creación del formulario «Pesaje»",
-    desc: "La administradora registra el nombre del formulario. La organización se toma de la sesión del usuario. El sistema crea el formulario y su versión 1 en estado borrador (DRAFT).",
-    screen: () => fe(0, false, card("1", "Datos generales", "El usuario solo ingresa el nombre del formulario.",
-      `<div class="grid2">${fl("Nombre", typed("Pesaje"), H.usr("Ingresado por el usuario"), "focus")}${fl("Organización", "Ganadera La Esperanza", H.org("Tomada de la sesión"))}</div>
-       <div class="note" style="margin-top:10px">El identificador, el número de versión, el estado <b>DRAFT</b> y las fechas los genera el sistema.</div>`)),
-    ops: [ins("formulario", { id: "frm-01", organizacion_id: "org-01", nombre: "Pesaje", creado_por: "usr-laura", creado_en: "2026-10-30 09:00" }),
-          ins("version_formulario", { id: "ver-01", formulario_id: "frm-01", numero_version: 1, estado: "DRAFT", creado_en: "2026-10-30 09:00", publicado_por: N, publicado_en: N })] },
+    desc: "La administradora registra el nombre del formulario y elige el tipo de activo sobre el que se ejecutará: un formulario por tipo de activo. La organización se toma de la sesión del usuario. El sistema crea el formulario y su versión 1 en estado borrador (DRAFT).",
+    screen: () => fe(0, false, card("1", "Datos generales", "El usuario ingresa el nombre del formulario y elige el tipo de activo.",
+      `<div class="grid3">${fl("Nombre", typed("Pesaje"), H.usr("Ingresado por el usuario"), "focus")}${fl("Tipo de activo", "Bovino", H.inv("Lista de Inventario"), "focus")}${fl("Organización", "Ganadera La Esperanza", H.org("Tomada de la sesión"))}</div>
+       <div class="note" style="margin-top:10px">El identificador, el número de versión, el estado <b>DRAFT</b> y las fechas los genera el sistema. El tipo de activo le indica a Planificación qué población pedir a Inventario.</div>`)),
+    ops: [ins("formulario", { id: "frm-01", organizacion_id: "org-01", nombre: "Pesaje" }),
+          ins("version_formulario", { id: "ver-01", formulario_id: "frm-01", numero_version: 1, estado: "DRAFT", tipo_activo_id: "inv-tipo-bovino", revision: 1, creado_por: "usr-laura", creado_en: "2026-10-30 09:00", publicado_por: N, publicado_en: N, obsoleto_en: N })] },
   { title: "Claves de búsqueda",
-    desc: "Inventario publica los atributos del tipo de activo y cuáles son aptos para búsqueda. Se seleccionan RFID, para identificar al animal en campo, y Sexo y Edad, para segmentar la población. Se almacena la referencia al atributo, no su valor.",
+    desc: "Inventario publica los atributos del tipo de activo y cuáles son aptos para búsqueda. Se seleccionan RFID, para identificar al animal en campo, y Sexo y Edad, para segmentar la población. Se almacena la referencia al atributo, no su nombre ni su valor. Por ahora ninguna clave se marca como filtro.",
     screen: () => fe(1, false, card("2", "Claves de búsqueda", "Lista entregada por Inventario. El usuario selecciona los atributos que usará el formulario.",
       `${atrBusqueda(["RFID", "Sexo", "Edad (meses)"])}
        <div class="note" style="margin-top:10px">«Peso actual» no está habilitado para búsqueda: la aptitud de cada atributo la define Inventario (04 §8).</div>`, "focus")),
-    ops: [ins("clave_busqueda", { id: "cb-01", version_formulario_id: "ver-01", atributo_id: "inv-atr-rfid", nombre: "RFID" }),
-          ins("clave_busqueda", { id: "cb-02", version_formulario_id: "ver-01", atributo_id: "inv-atr-sexo", nombre: "Sexo" }),
-          ins("clave_busqueda", { id: "cb-03", version_formulario_id: "ver-01", atributo_id: "inv-atr-edad", nombre: "Edad (meses)" })] },
+    ops: [ins("clave_formulario", kf("SEARCH", "inv-atr-rfid")),
+          ins("clave_formulario", kf("SEARCH", "inv-atr-sexo")),
+          ins("clave_formulario", kf("SEARCH", "inv-atr-edad"))] },
   { title: "Claves de contexto",
-    desc: "Se definen las dimensiones que acompañarán cada resultado: proceso, tipo de actividad y potrero. Una dimensión es la categoría del dato, no su valor. Los valores concretos se asignan al crear la tarea en Planificación.",
+    desc: "Se define el nivel de espacio que acompañará cada resultado: Potrero. Proceso y tipo de actividad no se declaran, porque toda tarea los tiene. Una dimensión es la categoría del dato, no su valor: los valores concretos los asigna la tarea en Planificación.",
     screen: () => fe(2, false, card("3", "Claves de contexto", "Dimensiones de Organización que permiten interpretar dónde y para qué se capturó cada resultado.",
-      `<div class="grid3">${opt("Proceso", "Dimensión de Organización", true, "focus")}${opt("Tipo de actividad", "Dimensión de Organización", true, "focus")}${opt("Ubicación · nivel Potrero", "Jerarquía de espacios", true, "focus")}</div>
-       <table class="mini" style="margin-top:12px"><thead><tr><th>Dimensión (se guarda ahora)</th><th>Valor (lo asigna la tarea)</th></tr></thead>
-       <tbody><tr><td>Proceso</td><td>Manejo animal</td></tr><tr><td>Tipo de actividad</td><td>Pesaje</td></tr><tr><td>Potrero</td><td>P-03</td></tr></tbody></table>`)),
-    ops: [ins("clave_contexto", { id: "cc-01", version_formulario_id: "ver-01", dimension: "PROCESS", tipo_espacio_id: N, nombre: "Proceso" }),
-          ins("clave_contexto", { id: "cc-02", version_formulario_id: "ver-01", dimension: "ACTIVITY_TYPE", tipo_espacio_id: N, nombre: "Tipo de actividad" }),
-          ins("clave_contexto", { id: "cc-03", version_formulario_id: "ver-01", dimension: "SPACE_LEVEL", tipo_espacio_id: "org-nivel-potrero", nombre: "Potrero" })] },
+      `<div class="grid3">${opt("Proceso", "Siempre presente · lo fija cada tarea", false)}${opt("Tipo de actividad", "Siempre presente · lo fija cada tarea", false)}${opt("Ubicación · nivel Potrero", "Jerarquía de espacios", true, "focus")}</div>
+       <table class="mini" style="margin-top:12px"><thead><tr><th>Dimensión</th><th>¿Se guarda en el formulario?</th><th>Valor (lo asigna la tarea)</th></tr></thead>
+       <tbody><tr><td>Proceso</td><td>No, es implícito</td><td>Manejo animal</td></tr><tr><td>Tipo de actividad</td><td>No, es implícito</td><td>Pesaje</td></tr><tr><td>Potrero</td><td>Sí</td><td>P-03</td></tr></tbody></table>`)),
+    ops: [ins("clave_formulario", kf("CONTEXT", "org-nivel-potrero"))] },
   { title: "Filtros disponibles",
-    desc: "Se indican las dimensiones sobre las que Planificación podrá filtrar la población: Sexo y Edad. El formulario no define valores; Planificación aplicará los criterios en cada tarea, por ejemplo Sexo = Hembra y Edad ≥ 24 meses.",
-    screen: () => fe(3, false, card("4", "Filtros disponibles", "Se habilitan dimensiones; los criterios con sus valores los define Planificación (04 §10).",
-      `${atrFiltro(["Sexo", "Edad (meses)"])}
-       <div class="note" style="margin-top:10px">RFID no se habilita como filtro porque identifica un animal específico; no sirve para segmentar una población.<br>Ejemplo de criterio en Planificación: <b>Sexo = Hembra</b> y <b>Edad ≥ 24 meses</b>.</div>`, "focus")),
-    ops: [ins("filtro_disponible", { id: "fd-01", version_formulario_id: "ver-01", origen: "INVENTORY_ATTRIBUTE", referencia_id: "inv-atr-sexo", nombre: "Sexo" }),
-          ins("filtro_disponible", { id: "fd-02", version_formulario_id: "ver-01", origen: "INVENTORY_ATTRIBUTE", referencia_id: "inv-atr-edad", nombre: "Edad (meses)" })] },
+    desc: "Se marcan las claves sobre las que Planificación podrá filtrar la población: Sexo, Edad y Potrero. No es una tabla aparte: se actualiza la marca es_filtro de cada clave. El formulario no define valores; Planificación aplicará los criterios en cada tarea, por ejemplo Sexo = Hembra, Edad ≥ 24 meses y Potrero = P-03.",
+    screen: () => fe(3, false, card("4", "Filtros disponibles", "Se marcan dimensiones; los criterios con sus valores los define Planificación (04 §10).",
+      `${atrFiltro(["Sexo", "Edad (meses)", "Potrero"])}
+       <div class="note" style="margin-top:10px">RFID no se marca como filtro porque identifica un animal específico; no sirve para segmentar una población.<br>Ejemplo de criterio en Planificación: <b>Sexo = Hembra</b>, <b>Edad ≥ 24 meses</b> y <b>Potrero = P-03</b>.</div>`, "focus")),
+    ops: [upd("clave_formulario", "SEARCH:inv-atr-sexo", { es_filtro: true }),
+          upd("clave_formulario", "SEARCH:inv-atr-edad", { es_filtro: true }),
+          upd("clave_formulario", "CONTEXT:org-nivel-potrero", { es_filtro: true })] },
   { title: "Sección del formulario",
     desc: "El formulario se organiza en secciones. Este ejemplo utiliza una única sección, llamada «Pesaje».",
     screen: () => fe(4, false, card("5", "Diseñador de campos", "Se crea la sección y luego sus campos.",
@@ -302,22 +302,22 @@ const STEPS = [
     desc: "Campo numérico decimal y obligatorio, con una regla de validación: el valor debe estar entre 50 y 1.000 kg.",
     screen: () => fe(5, false, `<div class="grid2" style="align-items:start">${card("6", "Diseñador de campos", "Sección Pesaje.", designer(1))}
       ${card("⚙", "Propiedades", "Campo seleccionado: Peso (kg).",
-        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Peso (kg)"), H.usr("Ingresado por el usuario"))}${fl("Tipo de dato", "DECIMAL", H.fij("Lista del sistema"))}${fl("Obligatorio", "Sí")}${fl("Regla de validación", "Mínimo 50 · máximo 1.000", "", "focus")}</div>`)}</div>`),
-    ops: [ins("campo_formulario", { id: "cf-01", seccion_id: "sec-01", nombre: "Peso (kg)", tipo: "DECIMAL", orden: 1, obligatorio: true, valor_inicial: N, reglas: { min: 50, max: 1000 } })] },
+        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Peso (kg)"), H.usr("Ingresado por el usuario"))}${fl("Código", "peso_kg", H.fij("Generado del nombre · estable entre versiones"))}${fl("Tipo de dato", "DECIMAL", H.fij("Lista del sistema"))}${fl("Obligatorio", "Sí")}${fl("Regla de validación", "Mínimo 50 · máximo 1.000", "", "focus")}</div>`)}</div>`),
+    ops: [ins("campo_formulario", { id: "cf-01", seccion_id: "sec-01", codigo: "peso_kg", nombre: "Peso (kg)", tipo: "DECIMAL", orden: 1, obligatorio: true, ayuda: N, valor_inicial: N, reglas: { min: 50, max: 1000 }, condiciones: N, catalogo_maestro_id: N })] },
   { title: "Campo «Condición corporal»",
     desc: "Campo de selección única y obligatorio: el operador elige una opción de una lista definida en el formulario.",
     screen: () => fe(5, false, `<div class="grid2" style="align-items:start">${card("7", "Diseñador de campos", "Sección Pesaje.", designer(2))}
       ${card("⚙", "Propiedades", "Campo seleccionado: Condición corporal.",
-        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Condición corporal"), H.usr("Ingresado por el usuario"))}${fl("Tipo de dato", "SINGLE_SELECT", H.fij("Lista del sistema"), "focus")}${fl("Obligatorio", "Sí")}</div>`)}</div>`),
-    ops: [ins("campo_formulario", { id: "cf-02", seccion_id: "sec-01", nombre: "Condición corporal", tipo: "SINGLE_SELECT", orden: 2, obligatorio: true, valor_inicial: N, reglas: N })] },
+        `<div class="stack" style="gap:8px">${fl("Nombre", typed("Condición corporal"), H.usr("Ingresado por el usuario"))}${fl("Código", "condicion_corporal", H.fij("Generado del nombre"))}${fl("Tipo de dato", "SINGLE_SELECT", H.fij("Lista del sistema"), "focus")}${fl("Obligatorio", "Sí")}</div>`)}</div>`),
+    ops: [ins("campo_formulario", { id: "cf-02", seccion_id: "sec-01", codigo: "condicion_corporal", nombre: "Condición corporal", tipo: "SINGLE_SELECT", orden: 2, obligatorio: true, ayuda: N, valor_inicial: N, reglas: N, condiciones: N, catalogo_maestro_id: N })] },
   { title: "Opciones del campo de selección",
-    desc: "Se registran tres opciones: Flaca, Normal y Gorda. Cada opción es un registro; el resultado de la captura almacenará la referencia a la opción seleccionada.",
+    desc: "Se registran tres opciones: Flaca, Normal y Gorda. Cada opción es un registro; el resultado de la captura almacenará el código de la opción seleccionada, que se conserva entre versiones.",
     screen: () => fe(6, false, `<div class="grid2" style="align-items:start">${card("8", "Diseñador de campos", "Sección Pesaje.", designer(3))}
       ${card("⚙", "Opciones de «Condición corporal»", "Ingresadas por el usuario, en el orden en que se presentarán.",
         `<div class="stack" style="gap:8px">${fl("Opción 1", typed("Flaca"), "", "focus")}${fl("Opción 2", "Normal", "", "focus")}${fl("Opción 3", "Gorda", "", "focus")}</div>`)}</div>`),
-    ops: [ins("opcion_campo", { id: "op-01", campo_formulario_id: "cf-02", etiqueta: "Flaca", orden: 1, activa: true }),
-          ins("opcion_campo", { id: "op-02", campo_formulario_id: "cf-02", etiqueta: "Normal", orden: 2, activa: true }),
-          ins("opcion_campo", { id: "op-03", campo_formulario_id: "cf-02", etiqueta: "Gorda", orden: 3, activa: true })] },
+    ops: [ins("opcion_campo", { id: "op-01", campo_formulario_id: "cf-02", codigo: "flaca", etiqueta: "Flaca", orden: 1 }),
+          ins("opcion_campo", { id: "op-02", campo_formulario_id: "cf-02", codigo: "normal", etiqueta: "Normal", orden: 2 }),
+          ins("opcion_campo", { id: "op-03", campo_formulario_id: "cf-02", codigo: "gorda", etiqueta: "Gorda", orden: 3 })] },
   { title: "Vista previa",
     desc: "El sistema construye el formulario a partir de las tablas y lo presenta tal como lo verá el operador. La regla de validación se aplica: un peso de 1.200 kg no se acepta. Este paso no registra datos.",
     screen: () => fe(7, false, `<div class="card enter"><div class="phone focus"><div class="ph-in"><div class="ph-top"><b>Pesaje</b><span>Vista previa</span></div><div class="ph-body">
@@ -331,7 +331,7 @@ const STEPS = [
   { title: "Publicación de la versión 1",
     desc: "El sistema valida la configuración y publica la versión. Se actualiza un único registro: la versión pasa a PUBLISHED, con usuario y fecha. A partir de este momento la versión es inmutable y queda disponible para Planificación.",
     screen: () => fe(8, true, card("✓", "Validación previa a la publicación", "Sin observaciones.",
-      `<ul class="ok-list"><li>El formulario tiene una sección y dos campos</li><li>El campo de selección tiene opciones activas</li><li>RFID, Sexo y Edad siguen habilitados para búsqueda en Inventario</li><li>Cada filtro disponible corresponde a una clave de búsqueda</li></ul>
+      `<ul class="ok-list"><li>El formulario tiene una sección y dos campos</li><li>Tiene tipo de activo: Bovino</li><li>El campo de selección tiene opciones</li><li>RFID, Sexo y Edad siguen habilitados para búsqueda en Inventario</li><li>El nivel Potrero existe en la jerarquía de espacios de Organización</li></ul>
        <div style="margin-top:12px" class="focus"><span class="badge pub" style="font-size:12px;padding:6px 12px">✓ Publicada · versión 1 · 30-oct-2026 10:15</span></div>`)),
     ops: [upd("version_formulario", "ver-01", { estado: "PUBLISHED", publicado_por: "usr-laura", publicado_en: "2026-10-30 10:15" })],
     event: "FormVersionPublished.v1 · notifica a Planificación que la versión ver-01 está disponible." }
@@ -346,16 +346,16 @@ function renderDB(k) {
   const db = {}; TABLES.forEach(([t]) => db[t] = []);
   for (let i = 0; i <= k; i++) for (const o of STEPS[i].ops) {
     if (o.op === "INSERT") db[o.t].push({ ...o.row });
-    else Object.assign(db[o.t].find(r => r.id === o.id), o.set);
+    else Object.assign(db[o.t].find(r => rk(r) === o.id), o.set);
   }
   const ch = {};
   for (const o of STEPS[k].ops) {
     const c = ch[o.t] || (ch[o.t] = { ins: new Set(), upd: new Map(), ops: new Set() });
     c.ops.add(o.op);
-    if (o.op === "INSERT") c.ins.add(o.row.id); else c.upd.set(o.id, new Set(Object.keys(o.set)));
+    if (o.op === "INSERT") c.ins.add(rk(o.row)); else c.upd.set(o.id, new Set(Object.keys(o.set)));
   }
   let h = `<div class="db-h"><b>PostgreSQL · esquema <span>forms</span></b><div class="leg"><span class="op ins">INSERT · registro nuevo</span><span class="op upd">UPDATE · registro modificado</span></div></div>
-    <div class="db-sub">Las 8 tablas del esquema, en orden. ${Object.keys(ch).length ? "Resaltada, la tabla que se actualiza en este paso." : "En este paso no se registran datos."}</div>`;
+    <div class="db-sub">Las 6 tablas del esquema, en orden. ${Object.keys(ch).length ? "Resaltada, la tabla que se actualiza en este paso." : "En este paso no se registran datos."}</div>`;
   if (STEPS[k].event) h += `<div class="evt enter">Evento: <b>${esc(STEPS[k].event)}</b></div>`;
   TABLES.forEach(([t, what, cols], i) => {
     const rows = db[t], c = ch[t];
@@ -364,7 +364,7 @@ function renderDB(k) {
       ${c ? [...c.ops].map(o => `<span class="op ${o === "INSERT" ? "ins" : "upd"}">${o}</span>`).join("") : ""}<span class="what">${what}</span><span class="cnt">${rows.length} fila${rows.length === 1 ? "" : "s"}</span></div>`;
     if (!rows.length) h += `<div class="tb-e">Sin registros · se completa en el paso ${firstStep[t]}</div>`;
     else h += `<div class="tb-b"><table><thead><tr>${cols.map(x => `<th>${x}</th>`).join("")}</tr></thead><tbody>${rows.map(r => {
-      const isIns = c && c.ins.has(r.id), u = c && c.upd.get(r.id);
+      const isIns = c && c.ins.has(rk(r)), u = c && c.upd.get(rk(r));
       return `<tr class="${isIns ? "ins" : u ? "updrow" : ""}">${cols.map(x => `<td class="${r[x] === null || r[x] === undefined ? "nul" : ""} ${r[x] && typeof r[x] === "object" ? "json" : ""} ${u && u.has(x) ? "upd" : ""}">${esc(fmt(r[x]))}</td>`).join("")}</tr>`;
     }).join("")}</tbody></table></div>`;
     h += `</div>`;

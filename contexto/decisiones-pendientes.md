@@ -18,7 +18,7 @@ que el dueño la apruebe.
 | Código | Tema | Tipo | Decide | Skills afectadas | Estado |
 | --- | --- | --- | --- | --- | --- |
 | DP-01 | Qué documento manda: 04/05 frente a v3.1, 00 y Master Context | Funcional | Producto | 1, 6, 8 | ABIERTA |
-| DP-02 | Claves de contexto: cuáles son y cómo encajan con D-04 | Funcional | Producto | 6, 7 | ABIERTA |
+| DP-02 | Claves de contexto: cuáles son y cómo encajan con D-04 | Funcional | Producto | 6, 7 | ACORDADA (confirmar con Producto) |
 | DP-03 | Contrato de consulta de población a Inventario | Funcional + Técnica | Inventario + Planificación | 2, 8 | ABIERTA |
 | DP-04 | Recurrencia: instancias, dataset y versión del formulario | Funcional | Producto | 7, 8, 10 | ABIERTA |
 | DP-05 | Disparadores de transición de estados de la tarea | Funcional | Producto | 9, 10 | ABIERTA |
@@ -26,7 +26,7 @@ que el dueño la apruebe.
 | DP-07 | Contenido y formato del paquete de trabajo | Funcional + Técnica | Planificación + STAGING + Mobile | 6, 13, 14 | ABIERTA |
 | DP-08 | Dónde vive el mapeo campo → atributo maestro | Funcional | Inventario + Formularios | 2, 6, 14 | ABIERTA |
 | DP-09 | Coexistencia de versiones, obsolescencia y borradores | Funcional | Producto | 7 | ABIERTA |
-| DP-10 | Varios tipos de activo, potrero (espacio o activo) y tareas sin activo | Funcional | Producto | 6, 8 | ABIERTA |
+| DP-10 | Varios tipos de activo, potrero (espacio o activo) y tareas sin activo | Funcional | Producto | 6, 8 | PARCIAL: tipo de activo acordado |
 | DP-11 | Lenguaje de condiciones entre campos y secciones repetibles | Funcional + Técnica | Formularios + Mobile | 6, 7 | ABIERTA |
 | DP-12 | Unidad de medida en campos y límites de evidencia | Funcional | Producto | 4, 6 | ABIERTA |
 | DP-13 | ¿La web ejecuta formularios o solo los previsualiza y prueba? | Funcional | Producto | 6, 13 | ABIERTA |
@@ -36,13 +36,14 @@ que el dueño la apruebe.
 | DP-17 | Reprogramar o reasignar una tarea ya publicada | Funcional | Producto | 10, 13 | ABIERTA |
 | DP-18 | Casos de sincronización: rechazo del servidor, recapturas, activo fuera del dataset | Funcional | Producto | 14 | ABIERTA |
 | DP-19 | Formulario estándar de alerta: ¿plantilla de Formularios o fijo? | Funcional | Producto | 6, 11 | ABIERTA |
-| DP-20 | Catálogo de causas de no ejecución/cancelación: quién lo parametriza | Funcional | Producto | 13, 14 | ABIERTA |
+| DP-20 | Catálogo de causas de no ejecución/cancelación: quién lo parametriza | Funcional | Producto | 13, 14 | ABIERTA (contenido acordado) |
 | DP-21 | Estados de mensaje de STAGING (09 frente a Master Context) | Técnica | Arquitectura (ADR) | 12 | ABIERTA |
 | DP-22 | Esquemas físicos para Mobile (servidor), Control, Knowledge y Advisory | Técnica | Arquitectura (ADR) | 2, 14 | ABIERTA |
 | DP-23 | Matriz de permisos por rol en Formularios y Planificación | Funcional | Producto | 5, 6, 7, 9 | ABIERTA |
 | DP-24 | Alcance de un formulario: organización, grupo o finca | Funcional | Producto | 6 (esquema `forms`) | ABIERTA |
 | DP-25 | Idioma de nombres de tablas y columnas (español del equipo o inglés del documento 10) | Técnica | Arquitectura (ADR) | Modelo de datos | ABIERTA |
 | DP-26 | Formularios para definir estructuras que no se pueden estandarizar | Funcional | Producto | 6 | ABIERTA |
+| DP-27 | Condiciones de la tarea (`task_condition` del 10 §12): qué son | Funcional | Producto | 9, 10 | ABIERTA |
 
 ## Detalle
 
@@ -71,6 +72,13 @@ D-04: "el formulario no asigna procesos ni actividades a la plantilla".
 **Información recibida (2026-10-27).** Los procesos se establecen en Organización y Formularios los trae como
 contexto. Organización debe agregar la relación finca–proceso (ver `modelo-datos/README.md`). Sigue abierto si esto
 es compatible con D-04.
+**Acordado por el responsable del módulo (2026-11-09), por confirmar con Producto.** Proceso y tipo de actividad no
+se declaran como claves de contexto: toda tarea los tiene (05 §10) y su valor lo fija la tarea, lo que es compatible
+con D-04. Las claves de contexto del formulario quedan para los niveles de la jerarquía de espacios (por ejemplo,
+Potrero) y otros contextos autorizados, que siguen sin definir. El contexto se fija en la tarea, no en cada captura
+(04 §22, 09C §10.4). El espacio de la tarea es dónde se trabaja; filtrar la población por ubicación es un criterio.
+Las claves llevan la marca `es_filtro` en lugar de una tabla de filtros disponibles (04 §10). Modelo:
+`modelo-datos/formularios.md` (`clave_formulario`) y `planificacion.md` (`tarea.espacio_id`, `tarea.criterios`).
 
 ### DP-03 — Contrato de consulta de población a Inventario
 Falta definir: operaciones de filtro (=, ≠, >, ≥, <, ≤, entre, en lista), combinación (solo Y, o también O),
@@ -118,6 +126,9 @@ un borrador abierto por formulario? ¿Quién marca Obsoleto?
 Organización (02) y puede ser activo territorial en la taxonomía (03, 10 §7). ¿Existen tareas sin activo
 (05 §6 habla de "activo o unidad")?
 **Propuesta.** Para el MVP: un formulario por tipo de activo y datasets de un solo tipo.
+**Acordado por el responsable del módulo (2026-11-09), por confirmar con Producto.** Un formulario por tipo de
+activo: `version_formulario.tipo_activo_id`, obligatorio para publicar. En consecuencia, el dataset es de un solo
+tipo. **Siguen abiertos:** el potrero como espacio o activo y las tareas sin activo.
 
 ### DP-11 — Lenguaje de condiciones
 04 §4 permite "dependencias sencillas" y "obligatoriedad condicional". Web y Mobile deben evaluarlas igual.
@@ -159,6 +170,8 @@ estimada (por tipo de actividad, por activo, manual) ni dónde se registra la di
 
 ### DP-20 — Causas de no ejecución
 05 §18 y 06 §15 listan causas más "otra causa parametrizada". ¿Quién mantiene ese catálogo y en qué dominio vive?
+**Acordado por el responsable del módulo (2026-11-09).** Cada causa del catálogo indica si exige observación y si
+exige evidencia (05 §18); no se configura en cada formulario. Siguen abiertos el dueño y el dominio del catálogo.
 
 ### DP-21 — Estados de mensaje STAGING
 09 §8.1: RECEIVED → VALIDATED → PROCESSING → PROCESSED / RETRYING / REJECTED → DLQ.
@@ -195,3 +208,11 @@ excluye crear copias de maestros dentro del formulario.
 **Falta.** Qué estructuras concretas se definen con Formularios (atributos, catálogos u otras), cómo se distinguen
 de los maestros de Organización e Inventario, y actualizar el 04 en consecuencia.
 **Mientras esté abierta.** No se implementa la definición de estructuras con Formularios más allá de lo que dice el 04.
+
+### DP-27 — Condiciones de la tarea
+El 10 §12 lista `task_condition` («condiciones obligatorias/operativas de la tarea») y el 05 §13 pide mostrar las
+«condiciones de cierre» en el resultado esperado. Ningún documento dice qué contiene una condición de la tarea ni
+quién la define. Se abrió al revisar el modelo `planning` con el ejercicio «Pesaje» (2026-11-09).
+**Pregunta.** ¿Qué son: condiciones de cierre (por ejemplo, un porcentaje mínimo de captura exitosa, que se juntaría
+con DP-05), requisitos operativos (equipo, insumos) u otra cosa?
+**Mientras esté abierta.** El esquema `planning` no tiene columna ni tabla de condiciones de la tarea.

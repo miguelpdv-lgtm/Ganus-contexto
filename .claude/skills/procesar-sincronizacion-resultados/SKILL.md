@@ -44,26 +44,32 @@ tarde, desordenado o repetido.
 ```
 `resultStatus`: `SUCCESS` (Ejecutado exitosamente), `INCONSISTENT` (Ejecutado con inconsistencia),
 `NOT_EXECUTED` (No ejecutado), `CANCELLED` (Cancelado). `cause` es obligatoria en los dos últimos.
-Los valores se indexan por `fieldId` estable, no por etiqueta.
+Los valores se indexan por `fieldId` de la versión de la tarea, no por etiqueta. Para una selección se guarda el
+código de la opción.
+El contrato del 09C §10.5 no trae `cause` ni la observación: observación registrada a STAGING y Mobile en
+`modelo-datos/README.md`.
 
 ## Procedimiento
 1. **STAGING** valida sobre, contrato e idempotencia y registra Inbox (`definir-envelope-staging`).
 2. **Duplicado:** si `captureId` o `idempotencyKey` ya se aplicó → devolver el resultado existente, sin efecto nuevo.
 3. **Ámbito:** la tarea existe, pertenece a la finca del mensaje y el actor es su responsable (09C §14).
-4. **Población:** el `assetId` está en el `task_target` de la tarea. Si no está → rechazar (D-09). Ver DP-18.
-5. **Versión:** `formVersionId` coincide con la versión de la tarea. Si no coincide → CONFLICT; no se decide en silencio (09C §9).
+4. **Población:** el `assetId` está incluido en `activo_tarea` de la tarea. Si no está → rechazar (D-09). Ver DP-18.
+5. **Versión:** `formVersionId` coincide con la versión de la tarea y `taskVersion` con un paquete emitido. Si no
+   coincide → CONFLICT; no se decide en silencio (09C §9). La versión del formulario no se guarda en la captura.
 6. **Estado de la tarea:** si la tarea está Cancelada o Cerrada → conflicto registrado, no se aplica (09C §9).
 7. **Revalidación:** el servidor vuelve a aplicar las validaciones de la versión (06 §11: la validación final usa
    las condiciones recibidas). Qué hacer si falla: DP-18.
 8. **Aplicar** en una transacción (caso de uso de Planificación/Ejecución):
-   - `form_execution_result` + `form_execution_value` + `form_execution_validation`;
-   - `asset_form_result_link`;
-   - `task_asset_result` con el nuevo estado; `task_exception` con la causa si aplica;
-   - tiempos (inicio, fin) para indicadores (06 §23);
+   - `captura` (equivale a `form_execution_result`, `form_execution_validation` y `task_exception` del 10): resultado
+     reportado, causa, observación, validaciones fallidas, origen, tiempos (`iniciado_en`, `capturado_en`) y
+     `aplicacion`;
+   - `valor_captura` (equivale a `form_execution_value`), un valor jsonb por campo;
+   - `activo_tarea.estado` con el resultado consolidado (equivale a `task_asset_result`);
    - avance de la tarea y, si es la primera actividad, transición a En ejecución (`gestionar-estados-tarea`);
    - Outbox con los eventos derivados para Control y Knowledge.
 9. **Evidencias:** el archivo se registra en el servicio de Archivos; aquí solo se vincula su `evidenceId`
-   (`form_execution_evidence`) (06 §16, 10 §21).
+   (en `valor_captura` si es un campo de foto, documento, video, nota de voz o firma; en `captura.evidencias` si
+   respalda una no ejecución o cancelación) (06 §16, 10 §21). Modelo: `modelo-datos/planificacion.md`.
 10. **Inventario:** solo los campos con mapeo explícito y autorizado se envían a Inventario como comando o contrato
     (no escritura directa), con valor anterior, nuevo, fecha efectiva, origen, tarea, formulario/versión y usuario
     (03 §6.0). El resto queda como resultado histórico (10 §11).
@@ -91,7 +97,8 @@ El núcleo responde con un ACK para que el móvil pase a Confirmado.
   mismo activo y activo encontrado fuera del dataset. Hasta resolverlo: registrar como conflicto para revisión, sin
   sobrescribir.
 - **DP-08:** dónde vive el mapeo campo → atributo maestro. Hasta resolverlo: no actualizar atributos de Inventario.
-- **DP-20:** catálogo de causas.
+- **DP-20:** catálogo de causas. Acordado: cada causa indica si exige observación y evidencia; el caso de uso lo valida
+  al recibir la captura.
 - **DP-22:** esquema físico de `form_execution_*` y de las tablas de Mobile del servidor.
 
 ## Verificación
