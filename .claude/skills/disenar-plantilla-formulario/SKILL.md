@@ -91,7 +91,7 @@ Modelo de datos: `modelo-datos/formularios.md` (6 tablas, v1).
 | `preload` | Origen del valor precargado: Inventario, tarea, contexto o configuración (04 §11) |
 | `defaultValue` | Valor inicial |
 | `validations` | Reglas según el tipo (04 §16) |
-| `catalog` | Catálogo maestro referenciado o lista local (04 §17) |
+| `options` / `masterCatalogRef` | Lista local de opciones (`code` y `label`) o referencia a un catálogo maestro con su dominio (`inventory:raza`), nunca las dos (04 §17) |
 | `help` | Texto de ayuda opcional |
 
 ### 6. Tipos de campo (04 §12) y comportamiento
@@ -104,8 +104,8 @@ Modelo de datos: `modelo-datos/formularios.md` (6 tablas, v1).
 | `DECIMAL` | Peso, temperatura | número decimal | `min`, `max`, `decimals` |
 | `DATE` | Fecha de aplicación | `YYYY-MM-DD` | `min`, `max` |
 | `DATETIME` | Momento de un evento | ISO 8601 en UTC | `min`, `max` |
-| `SINGLE_SELECT` | Sexo, estado, condición | `optionId` | catálogo obligatorio |
-| `MULTI_SELECT` | Síntomas | lista de `optionId` | catálogo, `minSelected`, `maxSelected` |
+| `SINGLE_SELECT` | Sexo, estado, condición | `code` de la opción | opciones o catálogo maestro obligatorios |
+| `MULTI_SELECT` | Síntomas | lista de `code` | opciones o catálogo maestro, `minSelected`, `maxSelected` |
 | `BOOLEAN` | Sí / No | `true` / `false` | — |
 | `PHOTO` | Evidencia fotográfica | lista de `evidenceId` | `minCount`, `maxCount` (DP-12) |
 | `DOCUMENT` | Certificado, soporte | lista de `evidenceId` | `minCount`, `maxCount` (DP-12) |
@@ -185,7 +185,7 @@ no reemplaza el modelo relacional (10 §33).
           "required": "CONDITIONAL",
           "requiredWhen": { "all": [{ "field": "presenta_anomalia", "op": "eq", "value": true }] },
           "visibleWhen":  { "all": [{ "field": "presenta_anomalia", "op": "eq", "value": true }] },
-          "catalog": { "catalogId": "uuid", "kind": "LOCAL" } },
+          "options": [ { "code": "QUISTE", "label": "Quiste" }, { "code": "OTRO", "label": "Otro" } ] },
         { "fieldId": "uuid", "key": "foto", "label": "Foto", "type": "PHOTO", "order": 3, "required": "CONDITIONAL",
           "requiredWhen": { "all": [{ "field": "presenta_anomalia", "op": "eq", "value": true }] } },
         { "fieldId": "uuid", "key": "observacion", "label": "Observación", "type": "LONG_TEXT", "order": 4,
@@ -194,15 +194,10 @@ no reemplaza el modelo relacional (10 §33).
           "required": "OPTIONAL" }
       ]
     }
-  ],
-  "catalogs": [
-    { "catalogId": "uuid", "kind": "LOCAL", "options": [
-      { "optionId": "uuid", "code": "QUISTE", "label": "Quiste" },
-      { "optionId": "uuid", "code": "OTRO", "label": "Otro" } ] }
   ]
 }
 ```
-Los valores de rango y los catálogos del ejemplo son ilustrativos. El caso funcional es el del 04 §30.
+Los valores de rango y las opciones del ejemplo son ilustrativas. Un campo con catálogo maestro lleva `"masterCatalogRef": "inventory:raza"` en lugar de `options`. El caso funcional es el del 04 §30.
 
 Las etiquetas (`label`) de claves se toman de Inventario u Organización al generar el contrato; `forms` no las copia.
 
@@ -220,7 +215,7 @@ Reglas del contrato:
 | Sección | `seccion_formulario` |
 | Campo, validaciones (`reglas`), condiciones y precarga | `campo_formulario` |
 | Clave de búsqueda o de contexto, con marca de filtro | `clave_formulario` |
-| Opciones locales (los catálogos maestros se referencian en el campo) | `opcion_campo` |
+| Opciones locales (PK `campo + código`; el catálogo maestro se referencia en el campo con `catalogo_maestro_ref`) | `opcion_campo` |
 Índices sugeridos: `version_formulario (formulario_id, numero_version, estado)`, `campo_formulario (seccion_id, orden)` (10 §27).
 
 ## Procedimiento (04 §20, pasos 1 a 8)

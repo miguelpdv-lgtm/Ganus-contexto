@@ -69,7 +69,7 @@ Bloquean la publicación:
    resultados entre versiones. Una opción que ya no se ofrece simplemente no se copia.
 
 ### Obsoletar
-1. Un usuario autorizado (DP-23) marca la versión como Obsoleto.
+1. Un usuario autorizado (DP-23) marca la versión como Obsoleto: se guardan `obsoleto_por` y `obsoleto_en`.
 2. Las tareas existentes no cambian.
 3. El selector de formularios de Planificación deja de ofrecerla.
 

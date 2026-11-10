@@ -1,7 +1,8 @@
 # Esquema `planning` — Planificación y ejecución
 
-**Estado:** borrador v1 (2026-11-09), acordado por el responsable del módulo después del ejercicio con el formulario
-«Pesaje». Reemplaza al v0 (17 tablas).
+**Estado:** borrador v1.1 (2026-11-10), acordado por el responsable del módulo. Parte del v1 (2026-11-09, ejercicio con
+el formulario «Pesaje») más la auditoría del 2026-11-10 (ver «Cambios de la v1.1»). Reemplaza al v0 (17 tablas).
+Total: 6 tablas y 68 columnas.
 **Dueño:** Formularios y Planificación.
 **Fuentes:** 05 v1.0, 04 §21–§23, 06 §14–§23, 09C §9–§10, 10 §11–§13, §16, §19–§20 y §34, skills
 `calcular-dataset-poblacion`, `validar-publicacion-tarea`, `gestionar-estados-tarea`, `procesar-alerta-campo`,
@@ -18,7 +19,6 @@
 
 ```mermaid
 erDiagram
-    tarea |o--o{ tarea : "serie de recurrencia (DP-04)"
     tarea ||--o{ activo_tarea : "poblacion y resultado"
     activo_tarea ||--o{ captura : "recibe"
     captura ||--o{ valor_captura : "guarda valores"
@@ -43,9 +43,7 @@ erDiagram
         timestamptz inicio_programado
         timestamptz fin_programado
         int duracion_estimada_min "origen DP-16"
-        jsonb criterios "tipo, referencia_id, operador, valor"
-        jsonb recurrencia "regla, solo en la primera tarea de la serie (DP-04)"
-        uuid tarea_serie_id FK "primera tarea de la serie (DP-04)"
+        jsonb criterios "tipo, referencia_id, operador, valor (dimension maestra y su valor)"
         uuid alerta_origen_id FK "tarea creada desde una alerta"
         uuid recomendacion_origen_id "ref logica a Advisory"
         int version_paquete "sube con cada paquete nuevo"
@@ -54,9 +52,8 @@ erDiagram
     activo_tarea {
         uuid tarea_id PK, FK
         uuid activo_id PK "ref logica a inventory"
-        boolean incluido
-        text motivo "por que se excluyo"
-        varchar estado "6 estados del resultado; nulo si no esta incluido"
+        text motivo "obligatorio si estado es nulo: por que se excluyo"
+        varchar estado "6 estados del resultado; nulo = activo excluido del dataset"
     }
     captura {
         uuid id PK "captureId generado en el movil"
@@ -73,7 +70,7 @@ erDiagram
         text observacion
         jsonb validaciones "validaciones que fallaron en el servidor"
         uuid_array evidencias "uuid[]: archivos sin campo asociado"
-        varchar aplicacion "APPLIED, CONFLICT, REJECTED (DP-18)"
+        varchar aplicacion "APPLIED, CONFLICT (DP-18)"
     }
     valor_captura {
         uuid captura_id PK, FK
@@ -93,7 +90,6 @@ erDiagram
         varchar canal "VOICE, VIDEO, PHOTO, TEXT"
         varchar estado "DP-06"
         text descripcion
-        text observacion
         uuid_array evidencias "uuid[]"
         uuid reportado_por "ref logica"
         timestamptz ocurrido_en
@@ -119,13 +115,13 @@ erDiagram
 
 | Tabla.columna | Contenido | Fuente |
 | --- | --- | --- |
-| `tarea.espacio_id` | **Dónde se trabaja** (contexto del resultado). Debe ser del nivel que pide la clave `CONTEXT` del formulario. No filtra la población: los animales del P-03 pueden pesarse en el corral | 04 §9, §22; 09C §10.4 |
-| `tarea.criterios` | `[{"tipo": "SEARCH", "referencia_id": "<atributo>", "operador": "EQ", "valor": ...}, {"tipo": "CONTEXT", "referencia_id": "<espacio>", "operador": "EQ"}]`. Solo dimensiones con `es_filtro` en la versión. Se guarda la dimensión maestra, no el id de fila de `forms`, para que sobreviva a un cambio de versión en borrador. Operadores y combinación: DP-03 | 04 §10, 05 §12 |
-| `tarea.recurrencia`, `tarea.tarea_serie_id` | La primera tarea guarda la regla; cada ocurrencia es una tarea con su propio dataset y apunta a la primera. Sujeto a DP-04 | 05 §26 |
+| `tarea.espacio_id` | **Dónde se trabaja** (contexto del resultado). Si el formulario declara claves `CONTEXT`, debe ser un espacio del **nivel más bajo** declarado; los niveles superiores salen de la jerarquía de la finca. No filtra la población: los animales del P-03 pueden pesarse en el corral | 04 §9, §22; 09C §10.4 |
+| `tarea.criterios` | `[{"tipo": "SEARCH", "referencia_id": "<atributo_id>", "operador": "EQ", "valor": "hembra"}, {"tipo": "CONTEXT", "referencia_id": "<tipo_espacio_id>", "operador": "EQ", "valor": "<espacio_id>"}]`. La dimensión (`referencia_id`) es la de `clave_formulario`: un atributo de Inventario o un nivel de espacio; el valor es lo que elige el usuario (un espacio concreto, como P-03). Solo dimensiones con `es_filtro` en la versión. Se guarda la dimensión maestra, no el id de fila de `forms`, para que sobreviva a un cambio de versión en borrador. Operadores y combinación: DP-03 | 04 §10, 05 §12 |
+| Recurrencia | **Sin columnas hasta que se decida DP-04.** El 05 §26 pide trazabilidad de cada instancia; si cada ocurrencia es una tarea propia, bastará una columna que apunte a la primera tarea de la serie. Si la serie debe poder pausarse o editarse, hará falta una tabla de series | 05 §26 |
 | Origen de la tarea | Manual si `alerta_origen_id` y `recomendacion_origen_id` son nulos. Una alerta puede originar varias tareas | 05 §25, 10 §20, §34 |
-| `activo_tarea` | Una fila por activo evaluado. Incluidos con su resultado; excluidos con su motivo (por ejemplo, «sin fecha de nacimiento»). Las cantidades se cuentan aquí | 05 §12, §17 |
+| `activo_tarea` | Una fila por activo evaluado. **Incluido:** `estado` lleno (empieza en `PENDING`) y `motivo` nulo. **Excluido:** `estado` nulo y `motivo` lleno (por ejemplo, «sin fecha de nacimiento»). La cantidad objetivo es el conteo de filas con `estado`; no hay columna `incluido` porque sería lo mismo que «`estado` no es nulo» | 05 §12, §17 |
 | `captura` | Cada reporte del móvil por activo, también la no ejecución o cancelación. El contexto es el de la tarea, no se repite. La versión del formulario es la de la tarea: se valida al recibir y no se guarda | 05 §18–§19, 09C §10.5 |
-| `captura.resultado` / `aplicacion` / `activo_tarea.estado` | Lo que reportó el operador / si la captura cuenta / el resultado consolidado del activo | 05 §17, DP-18 |
+| `captura.resultado` / `aplicacion` / `activo_tarea.estado` | Lo que reportó el operador / si la captura cuenta (`APPLIED`) o choca con el estado de la tarea (`CONFLICT`) / el resultado consolidado del activo. Un mensaje rechazado, como un activo fuera del dataset, no se guarda aquí: queda en STAGING (DP-18) | 05 §17, 09C §9, DP-18 |
 | `captura.evidencias` | Evidencia que no pertenece a un campo, como la foto que justifica una cancelación. Las fotos de un campo `PHOTO` son su valor en `valor_captura` | 04 §13, 05 §18 |
 | `valor_captura.valor` | Valor tipado en JSON: `432.5`, `"normal"` (código de la opción), `true`, `["<archivo_id>"]` | 10 §11 |
 | `historial.estado` / `historial.tipo` | Si el evento cambia el estado, se llena `estado`. Si no lo cambia, se llena `tipo`. `CHECK (estado IS NOT NULL OR tipo IS NOT NULL)` | 05 §35, 10 §16 |
@@ -173,14 +169,14 @@ Estados del resultado por activo (10 §13): `PENDING`, `IN_PROGRESS`, `SUCCESS`,
 | Solo estados oficiales | `CHECK` en `tarea.estado`, `activo_tarea.estado`, `captura.resultado` | D-06, 10 §13 |
 | Transiciones válidas | Máquina de estados en el dominio + fila en `historial` por cada cambio | 05 §35, DP-05 |
 | Formulario publicado | Al crear o validar se verifica por contrato que la versión esté `PUBLISHED` | 05 regla 13 |
-| Versión y dataset fijos al publicar | El caso de uso rechaza cambios en `version_formulario_id`, `criterios` y `activo_tarea.incluido` después de `VALIDATED`; trigger opcional | 05 reglas 17 y 29, 10 §16 |
+| Versión y dataset fijos al publicar | El caso de uso rechaza cambios en `version_formulario_id`, `criterios` y las filas de `activo_tarea` después de `VALIDATED`; trigger opcional | 05 reglas 17 y 29, 10 §16 |
 | Criterios permitidos | Cada criterio debe ser una dimensión con `es_filtro` en la versión de la tarea | 04 §10 |
-| Contexto válido | Si el formulario tiene una clave `CONTEXT`, `espacio_id` debe ser de ese nivel | 04 §9, §22 |
-| Responsable y dataset antes de publicar | Validación previa: `responsable_id` no nulo; en `MASS`, un `DATASET_CALCULATED` y filas incluidas | 05 reglas 14 y 15 |
+| Contexto válido | Si el formulario declara claves `CONTEXT`, `espacio_id` debe ser un espacio del nivel más bajo declarado; sin claves `CONTEXT`, es opcional y de cualquier nivel | 04 §9, §22; 05 §10 paso 6 |
+| Responsable y dataset antes de publicar | Validación previa: `responsable_id` no nulo; en `MASS`, un `DATASET_CALCULATED` y al menos una fila con `estado` | 05 reglas 14 y 15 |
 | Un resultado por activo y tarea | PK `(tarea_id, activo_id)` | 05 regla 19 |
-| Resultado solo para incluidos | `CHECK ((incluido AND estado IS NOT NULL) OR (NOT incluido AND estado IS NULL))` | 05 §17 |
+| Incluido con resultado, excluido con motivo | `CHECK ((estado IS NOT NULL AND motivo IS NULL) OR (estado IS NULL AND motivo IS NOT NULL))` | 05 §12, §17 |
 | Capturas y alertas sin duplicados | `captura.id` = `captureId`, `alerta_campo.id` = `alertId` | 09C §9, 10 §34 |
-| Solo activos del dataset | FK compuesta `captura (tarea_id, activo_id)` → `activo_tarea`; además debe estar incluido | D-09, 05 regla 18 |
+| Solo activos del dataset | FK compuesta `captura (tarea_id, activo_id)` → `activo_tarea`; además el caso de uso exige que su `estado` no sea nulo (un activo excluido no se captura) | D-09, 05 regla 18 |
 | Un valor por campo y captura | PK `(captura_id, campo_id)` | 10 §11 |
 | No ejecutado o cancelado con causa | `CHECK (resultado NOT IN ('NOT_EXECUTED','CANCELLED') OR causa_codigo IS NOT NULL)`. Observación o evidencia obligatorias según el catálogo de causas (DP-20) | 05 §18, regla 22 |
 | Historial de una sola entidad | `CHECK` exactamente uno de `tarea_id`, `alerta_id` | — |
@@ -211,12 +207,38 @@ y el criterio seguiría siendo P-03.
 | Tabla | Filas |
 | --- | --- |
 | `tarea` | tsk-01, TSK-000245, `MASS`, Manejo animal / Pesaje, `espacio_id` = P-03, ver-01, `MEDIUM`, Juan, 07:00–12:00, 234 min, criterios `[Sexo EQ Hembra, Edad GTE 24, Potrero EQ P-03]`, `version_paquete` 1 |
-| `activo_tarea` | 117 incluidas (pasan a `SUCCESS`, `NOT_EXECUTED`, `CANCELLED`…) y 3 excluidas «sin fecha de nacimiento» |
+| `activo_tarea` | 117 filas con `estado` (empiezan en `PENDING` y pasan a `SUCCESS`, `NOT_EXECUTED`, `CANCELLED`…) y 3 filas sin `estado` y con `motivo` «sin fecha de nacimiento» |
 | `captura` | V-1001 `SUCCESS` · V-1002 `NOT_EXECUTED`, causa «activo no encontrado» · V-1003 `CANCELLED`, causa «animal enfermo», observación «cojera», una foto |
 | `valor_captura` | V-1001: `peso_kg` = 432.5 · `condicion_corporal` = `"normal"` |
 | `alerta_campo` | alr-01: tarea tsk-01, activo V-1003, sanitaria, `HIGH`, canal `PHOTO` |
 | `tarea` (desde la alerta) | tsk-02, `UNIT`, formulario «Revisión sanitaria», `alerta_origen_id` = alr-01, una fila en `activo_tarea` (V-1003) |
 | `historial` | tsk-01: `DRAFT` → `DATASET_CALCULATED` → `ASSIGNMENT` → `VALIDATED` → `AVAILABLE_FOR_FIELD` (carga `NORMAL`) → `IN_PROGRESS` → `FINISHED` → `PENDING_VALIDATION` → `CLOSED` · alr-01: `CONVERTED` |
+
+## Bloques de columnas
+
+Las columnas de cada tabla se pueden leer por bloques (el orden del diagrama es el mismo):
+
+| Tabla | Bloque | Columnas |
+| --- | --- | --- |
+| `tarea` | Identidad | `id`, `organizacion_id`, `finca_id`, `codigo`, `tipo` |
+| | Contexto | `proceso_id`, `tipo_actividad_id`, `espacio_id` |
+| | Formulario y población | `version_formulario_id`, `criterios` |
+| | Programación y responsable | `prioridad`, `responsable_id`, `inicio_programado`, `fin_programado`, `duracion_estimada_min` |
+| | Origen | `alerta_origen_id`, `recomendacion_origen_id` |
+| | Control | `estado`, `version_paquete`, `revision` |
+| `activo_tarea` | Todo | `tarea_id`, `activo_id`, `estado`, `motivo` |
+| `captura` | Identidad | `id`, `tarea_id`, `activo_id`, `version_paquete`, `origen` |
+| | Quién y cuándo | `capturado_por`, `iniciado_en`, `capturado_en`, `recibido_en` |
+| | Resultado | `resultado`, `aplicacion`, `validaciones` |
+| | Excepción (solo si no hubo ejecución exitosa) | `causa_codigo`, `observacion`, `evidencias` |
+| `valor_captura` | Todo | `captura_id`, `campo_id`, `valor` |
+| `alerta_campo` | Identidad y contexto | `id`, `organizacion_id`, `finca_id`, `tarea_id`, `activo_id`, `espacio_id`, `ubicacion` |
+| | La situación | `tipo`, `prioridad`, `canal`, `descripcion`, `evidencias` |
+| | Quién y cuándo | `reportado_por`, `ocurrido_en`, `recibido_en` |
+| | Control | `estado` |
+| `historial` | A qué pertenece | `id`, `tarea_id`, `alerta_id` |
+| | Qué pasó | `estado`, `tipo`, `dato`, `razon` |
+| | Quién y cuándo | `actor_id`, `origen`, `ocurrido_en` |
 
 ## Cambios respecto al v0
 
@@ -226,19 +248,34 @@ y el criterio seguiría siendo P-03.
 | 2 | `objetivo_tarea` y `resultado_activo_tarea` | Una tabla `activo_tarea` | Una fila por activo y tarea |
 | 3 | `excepcion_activo_tarea`, `validacion_captura`, `evidencia_ejecucion` | Columnas de `captura` | La excepción también es un reporte del campo |
 | 4 | `historial_estado_tarea`, `asignacion_tarea`, `decision_alerta`, columnas de auditoría | Una tabla `historial` | Una sola auditoría para tareas y alertas |
-| 5 | `serie_recurrencia` | `tarea.recurrencia` y `tarea_serie_id` | Sin tabla mientras DP-04 esté abierta |
+| 5 | `serie_recurrencia` | Sin tabla ni columnas (v1.1; en v1 eran `recurrencia` y `tarea_serie_id`) | El contenido depende de DP-04 |
 | 6 | `alerta_tarea` y `evidencia_alerta` | `tarea.alerta_origen_id` y `alerta_campo.evidencias` | Una tarea viene de una sola alerta |
 | 7 | Criterios apuntaban a `forms.filtro_disponible_formulario` | Apuntan a la dimensión maestra (`atributo_id` o espacio) | Estables entre versiones y entendibles por Inventario |
 | 8 | `espacio_id` sin regla | Contexto de dónde se trabaja; la ubicación de la población es un criterio | Ejercicio «Pesaje»: P-03 frente a corral |
 | 9 | Sin `task_condition` | No se modela; se abre DP-27 | Ningún documento define su contenido |
 | 10 | Sin origen manual o Advisory | `recomendacion_origen_id` | 10 §34 |
 | 11 | `captura.dispositivo_id`, `correlation_id`, `version_formulario_id` | Se quitan; se agrega `origen` | El contrato 09C §10.5 trae `source`; la versión es la de la tarea; el mensaje se encuentra por `captureId` |
-| 12 | `alerta_campo.ocurrio_offline` | Se quita; se agregan `ubicacion` y `observacion`; se mantiene `canal` | 05 §23–§24, 09C §10.6 |
+| 12 | `alerta_campo.ocurrio_offline` | Se quita; se agrega `ubicacion`; se mantiene `canal` (la `observacion` de la v1 se quitó en la v1.1) | 05 §23–§24, 09C §10.6 |
 | 13 | `valor_captura` con 5 columnas tipadas y `codigo_campo` | `valor` jsonb | El JSON conserva el tipo; el código está en `forms` |
+
+## Cambios de la v1.1 (auditoría del 2026-11-10)
+
+| # | v1 | v1.1 | Motivo |
+| --- | --- | --- | --- |
+| 1 | Criterio de contexto con `referencia_id` = espacio y sin valor | `referencia_id` = nivel de espacio (`tipo_espacio_id`) y `valor` = el espacio | Así se puede validar contra `es_filtro` de la clave, que es un nivel |
+| 2 | `espacio_id` del nivel de «la» clave `CONTEXT` | Del nivel más bajo declarado | Un formulario puede declarar Sector y Potrero (04 §9) |
+| 3 | `captura.aplicacion` con `REJECTED` | Solo `APPLIED` y `CONFLICT` | La FK impide guardar una captura de un activo fuera del dataset; el rechazo queda en STAGING |
+| 4 | `activo_tarea.incluido` | Se quita | Equivalía a «`estado` no es nulo» (reducción acordada) |
+| 5 | `tarea.recurrencia` y `tarea_serie_id` | Se quitan hasta que se decida DP-04 | Contenido no definido, igual que las condiciones de la tarea (reducción acordada) |
+| 6 | `alerta_campo.observacion` | Se quita | El contrato 09C §10.6 solo trae un mensaje; DP-19 definirá el formulario de alerta (reducción acordada) |
+
+Se mantiene `valor_captura` como tabla: la reducción de pasar los valores a un jsonb dentro de `captura` no se aplicó.
 
 ## Observaciones a otros módulos
 - **STAGING y Mobile:** el `TaskExecutionResult` del 09C §10.5 no tiene campos para la causa ni la observación de una
-  no ejecución o cancelación, que el 05 §18 exige. Registrado también en `modelo-datos/README.md`.
+  no ejecución o cancelación (05 §18), ni para el inicio por activo (06 §23) ni para la versión del paquete con la que
+  se ejecutó (`taskVersion`, 09C §10.4). El `Alert` del 09C §10.6 no trae ubicación ni espacio (05 §23). Registrado
+  también en `modelo-datos/README.md`.
 
 ## Pendientes que afectan este esquema
 DP-03 (operadores de `criterios`), DP-04 (recurrencia), DP-05 (disparadores de estados y estados compatibles con el

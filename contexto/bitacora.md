@@ -14,6 +14,28 @@ Formato de cada entrada:
 
 ---
 
+## 2026-11-10 — Auditoría del modelo v1: correcciones y reducciones (v1.1)
+- Qué: por indicación del usuario. Se audita el modelo v1 de `forms` y `planning` contra las fuentes. Se mantiene el
+  diseño (no se divide ninguna tabla) y se aplican 8 correcciones y 4 de las 5 reducciones propuestas:
+  1. El criterio de contexto de `tarea.criterios` usa el nivel de espacio como dimensión y el espacio como valor.
+  2. `tarea.espacio_id` es del nivel más bajo que declare el formulario.
+  3. `campo_formulario.catalogo_maestro_ref` (`dominio:catalogo`) reemplaza a `catalogo_maestro_id`.
+  4. `version_formulario.obsoleto_por`.
+  5. `captura.aplicacion` solo `APPLIED` y `CONFLICT`.
+  6. Convención de identificadores: uuid en entidades principales, PK compuesta en las dependientes.
+  7. Skill 6 alineada (código de la opción y contrato sin catálogos aparte).
+  8. Observaciones a STAGING y Mobile ampliadas (inicio por activo, versión del paquete, ubicación y espacio de la
+     alerta) y DP-27 con el 06 §7 y §15.
+  Reducciones: se quitan `activo_tarea.incluido`, `opcion_campo.id`, `tarea.recurrencia`, `tarea.tarea_serie_id` y
+  `alerta_campo.observacion`. No se aplica pasar los valores a un jsonb dentro de `captura`: `valor_captura` sigue.
+  Resultado: `forms` 6 tablas y 39 columnas; `planning` 6 tablas y 68 columnas. Los dos modelos agrupan las columnas
+  por bloques. DP-04 anota que no hay columnas de recurrencia.
+- Archivos: `modelo-datos/formularios.md`, `modelo-datos/planificacion.md`, `modelo-datos/README.md`,
+  `contexto/decisiones-pendientes.md`, `contexto/estado-actual.md`, `docs/index.html`, `README.md`, skills
+  `disenar-plantilla-formulario`, `versionar-formulario`, `calcular-dataset-poblacion` y
+  `procesar-sincronizacion-resultados`.
+- Rama / Jira: `claude/funny-brahmagupta-8pwmhv`.
+
 ## 2026-11-09 — Mockup de 6 tablas publicado en GitHub Pages
 - Qué: por indicación del usuario, la rama que publica GitHub Pages se adelanta hasta la rama de trabajo, así que
   https://miguelpdv-lgtm.github.io/Ganus-contexto/ muestra el mockup «Pesaje» con las 6 tablas del modelo v1.

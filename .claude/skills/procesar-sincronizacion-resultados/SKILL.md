@@ -53,7 +53,7 @@ El contrato del 09C §10.5 no trae `cause` ni la observación: observación regi
 1. **STAGING** valida sobre, contrato e idempotencia y registra Inbox (`definir-envelope-staging`).
 2. **Duplicado:** si `captureId` o `idempotencyKey` ya se aplicó → devolver el resultado existente, sin efecto nuevo.
 3. **Ámbito:** la tarea existe, pertenece a la finca del mensaje y el actor es su responsable (09C §14).
-4. **Población:** el `assetId` está incluido en `activo_tarea` de la tarea. Si no está → rechazar (D-09). Ver DP-18.
+4. **Población:** el `assetId` tiene una fila en `activo_tarea` de la tarea con `estado` no nulo (un excluido tampoco se captura). Si no → rechazar (D-09); el rechazo queda en STAGING, no en `captura`. Ver DP-18.
 5. **Versión:** `formVersionId` coincide con la versión de la tarea y `taskVersion` con un paquete emitido. Si no
    coincide → CONFLICT; no se decide en silencio (09C §9). La versión del formulario no se guarda en la captura.
 6. **Estado de la tarea:** si la tarea está Cancelada o Cerrada → conflicto registrado, no se aplica (09C §9).
@@ -62,7 +62,7 @@ El contrato del 09C §10.5 no trae `cause` ni la observación: observación regi
 8. **Aplicar** en una transacción (caso de uso de Planificación/Ejecución):
    - `captura` (equivale a `form_execution_result`, `form_execution_validation` y `task_exception` del 10): resultado
      reportado, causa, observación, validaciones fallidas, origen, tiempos (`iniciado_en`, `capturado_en`) y
-     `aplicacion`;
+     `aplicacion` (`APPLIED`, o `CONFLICT` si la tarea ya está cancelada o cerrada);
    - `valor_captura` (equivale a `form_execution_value`), un valor jsonb por campo;
    - `activo_tarea.estado` con el resultado consolidado (equivale a `task_asset_result`);
    - avance de la tarea y, si es la primera actividad, transición a En ejecución (`gestionar-estados-tarea`);

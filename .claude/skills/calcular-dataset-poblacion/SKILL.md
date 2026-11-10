@@ -37,8 +37,8 @@ Responder "¿sobre quién se ejecuta la tarea?". El dataset pertenece a la tarea
 1. Solo se puede filtrar por dimensiones que la versión del formulario marca con `es_filtro` en sus claves de
    búsqueda o de contexto (04 §10).
 2. La población es del tipo de activo de la versión del formulario (`tipo_activo_id`, DP-10 acordada).
-3. El espacio de la tarea (`tarea.espacio_id`) es dónde se trabaja, no filtra. Para limitar la población por
-   ubicación se agrega un criterio sobre la clave de contexto (por ejemplo, `Potrero = P-03`).
+3. El espacio de la tarea (`tarea.espacio_id`, del nivel más bajo que declare el formulario) es dónde se trabaja, no filtra. Para limitar la población por
+   ubicación se agrega un criterio sobre la clave de contexto (por ejemplo, nivel `Potrero` igual a `P-03`).
 4. Los valores y operadores los pone Planificación (04 §6.4).
 5. Se pueden combinar varios criterios (05 §12). Operadores y combinación O: **DP-03**.
 6. Los activos se obtienen **por contrato de Inventario** (AssetReference / consulta autorizada), nunca leyendo
@@ -54,13 +54,15 @@ Responder "¿sobre quién se ejecuta la tarea?". El dataset pertenece a la tarea
     puede atenderse, se registra en su resultado individual (no ejecutado o cancelado con causa).
 
 ## Qué se guarda (modelo `modelo-datos/planificacion.md`)
-- `activo_tarea` (equivale a `task_target` + `task_asset_result`): una fila por activo evaluado, con `incluido`,
-  `motivo` de exclusión y el estado inicial del resultado (`PENDING`) para los incluidos.
-- `tarea.criterios`: dimensión maestra (`atributo_id` o nivel de espacio), operador y valor. No se guarda el id de la
-  fila de `forms`, para que los criterios sobrevivan a un cambio de versión en borrador.
+- `activo_tarea` (equivale a `task_target` + `task_asset_result`): una fila por activo evaluado.
+  Los incluidos llevan `estado` (inicial `PENDING`); los excluidos o inconsistentes llevan `estado` nulo y `motivo`.
+  No hay columna `incluido`: equivale a «`estado` no es nulo».
+- `tarea.criterios`: dimensión maestra (`atributo_id` o nivel de espacio `tipo_espacio_id`), operador y valor (un
+  espacio concreto, como P-03, en los criterios de contexto). No se guarda el id de la fila de `forms`, para que los
+  criterios sobrevivan a un cambio de versión en borrador.
 - `historial` con `tipo = DATASET_CALCULATED`: actor, fecha y hora, cantidades e instante de los datos de Inventario
   consultados (para explicar después por qué un activo entró).
-- La cantidad objetivo se cuenta en `activo_tarea`; la versión del formulario está en `tarea`.
+- La cantidad objetivo es el conteo de filas de `activo_tarea` con `estado`; la versión del formulario está en `tarea`.
 - **No** se guarda una copia editable de la identidad del activo (10 §33). Los datos que viajan al móvil son una
   instantánea de solo lectura dentro del paquete (`construir-paquete-trabajo`).
 Índice: `activo_tarea (tarea_id, estado)`; la PK es `(tarea_id, activo_id)` (10 §27).
@@ -73,7 +75,7 @@ Responder "¿sobre quién se ejecuta la tarea?". El dataset pertenece a la tarea
 5. Mostrar la cantidad, el detalle y los excluidos o inconsistentes que Inventario informe.
 6. Permitir recalcular mientras la tarea esté en borrador (se reemplazan sus filas de `activo_tarea`).
 7. Al confirmar y publicar (`validar-publicacion-tarea`), el dataset queda congelado: desde Validada no se modifican
-   `tarea.criterios` ni `activo_tarea.incluido`.
+   `tarea.criterios` ni las filas de `activo_tarea`.
 
 ## Ejemplo (04 §30)
 Formulario EVAL-REPRO v3, claves marcadas como filtro: Sexo, Edad, Estado, jerarquía física.

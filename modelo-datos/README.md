@@ -21,7 +21,7 @@ compartidas.
 
 | Tema | Convención | Fuente |
 | --- | --- | --- |
-| Identificadores | `uuid` en todas las PK. Recomendado UUID v7, que el móvil puede generar offline | 10 §3, §39 |
+| Identificadores | `uuid` en las entidades principales. Recomendado UUID v7, que el móvil puede generar offline. Las tablas dependientes pueden usar PK compuesta (`activo_tarea`, `valor_captura`, `clave_formulario`, `opcion_campo`) | 10 §3, §39 |
 | Referencias entre dominios | **Referencia lógica**: columna `uuid` sin FK física. Se valida en la aplicación. Una FK física entre esquemas solo con ADR | CONST §10, ARQ §8 |
 | FK dentro del mismo esquema | Sí, siempre | 10 §26 |
 | Tenant y finca | Toda tabla raíz lleva `organizacion_id` y, cuando aplique, `finca_id` | 10 §3, 09C §14 |
@@ -50,11 +50,15 @@ Para **Organización** (información recibida el 2026-10-27):
    (02 §11). Formularios la necesita para ofrecer los procesos como claves de contexto, y Planificación para listar
    solo los procesos de la finca al crear una tarea (05 §10, paso 1). Dirigida al responsable de Organización.
 
-Para **STAGING y Mobile** (ejercicio «Pesaje», 2026-11-09):
+Para **STAGING y Mobile** (ejercicio «Pesaje» y auditoría, 2026-11-09 y 2026-11-10):
 1. El contrato `TaskExecutionResult` (09C §10.5) no tiene campos para la **causa** ni la **observación** de una no
    ejecución o cancelación, que el 05 §18 exige. Planificación los guarda en `planning.captura` (`causa_codigo`,
-   `observacion`). Dirigida a los responsables de STAGING y Mobile.
-2. El contrato `FormVersionPublished` (09C §10.3) lleva `context: {processId, activityTypeId}`. Con DP-02 acordada,
+   `observacion`). Tampoco trae el **inicio por activo** (`iniciado_en`, 06 §23) ni la **versión del paquete** con la
+   que se ejecutó (`taskVersion`, 09C §10.4), que `planning.captura` necesita para indicadores de tiempo y para
+   detectar capturas hechas con un paquete viejo. Dirigida a los responsables de STAGING y Mobile.
+2. El contrato `Alert` (09C §10.6) no trae **ubicación** ni **espacio**, que el 05 §23 pide «cuando exista».
+   Planificación los guarda en `planning.alerta_campo` (`ubicacion`, `espacio_id`). Dirigida a STAGING y Mobile.
+3. El contrato `FormVersionPublished` (09C §10.3) lleva `context: {processId, activityTypeId}`. Con DP-02 acordada,
    el formulario no tiene proceso ni actividad (los fija la tarea); el evento debería llevar el tipo de activo
    (`assetTypeId`) y los niveles de espacio de contexto. Dirigida al responsable de STAGING.
 

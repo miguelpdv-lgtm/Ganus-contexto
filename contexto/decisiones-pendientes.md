@@ -76,7 +76,8 @@ es compatible con D-04.
 se declaran como claves de contexto: toda tarea los tiene (05 §10) y su valor lo fija la tarea, lo que es compatible
 con D-04. Las claves de contexto del formulario quedan para los niveles de la jerarquía de espacios (por ejemplo,
 Potrero) y otros contextos autorizados, que siguen sin definir. El contexto se fija en la tarea, no en cada captura
-(04 §22, 09C §10.4). El espacio de la tarea es dónde se trabaja; filtrar la población por ubicación es un criterio.
+(04 §22, 09C §10.4). El espacio de la tarea es dónde se trabaja (del nivel más bajo que declare el formulario);
+filtrar la población por ubicación es un criterio, con el nivel como dimensión y el espacio como valor.
 Las claves llevan la marca `es_filtro` en lugar de una tabla de filtros disponibles (04 §10). Modelo:
 `modelo-datos/formularios.md` (`clave_formulario`) y `planificacion.md` (`tarea.espacio_id`, `tarea.criterios`).
 
@@ -90,6 +91,9 @@ v3.1 §9.3: "cada ocurrencia recurrente puede reevaluar las condiciones de elegi
 05 §26: "conservar la trazabilidad de cada instancia".
 **Preguntas.** ¿Cada ocurrencia es una tarea propia con su estado? ¿El dataset se congela por ocurrencia o al crear la
 serie? Si se publica una nueva versión del formulario, ¿la usan las ocurrencias futuras?
+**Modelo v1.1 (2026-11-10).** El esquema `planning` no tiene columnas ni tabla de recurrencia hasta que esto se
+decida (el 05 §26 sigue pidiendo trazabilidad de cada instancia). Si cada ocurrencia es una tarea propia, bastará una
+columna que apunte a la primera tarea de la serie; si la serie debe poder pausarse o editarse, hará falta una tabla.
 
 ### DP-05 — Disparadores de transición de la tarea
 Los estados están cerrados (D-06), pero no qué los dispara:
@@ -210,8 +214,10 @@ de los maestros de Organización e Inventario, y actualizar el 04 en consecuenci
 **Mientras esté abierta.** No se implementa la definición de estructuras con Formularios más allá de lo que dice el 04.
 
 ### DP-27 — Condiciones de la tarea
-El 10 §12 lista `task_condition` («condiciones obligatorias/operativas de la tarea») y el 05 §13 pide mostrar las
-«condiciones de cierre» en el resultado esperado. Ningún documento dice qué contiene una condición de la tarea ni
+El 10 §12 lista `task_condition` («condiciones obligatorias/operativas de la tarea»), el 05 §13 pide mostrar las
+«condiciones de cierre» en el resultado esperado y el 06 §7 incluye «condiciones de ejecución» («reglas necesarias para
+ejecutar/cerrar») en el paquete de trabajo. El 06 §15 dice además que la observación o evidencia de una cancelación se
+pide «según la condición recibida», lo que conecta esta decisión con DP-20. Ningún documento dice qué contiene una condición de la tarea ni
 quién la define. Se abrió al revisar el modelo `planning` con el ejercicio «Pesaje» (2026-11-09).
 **Pregunta.** ¿Qué son: condiciones de cierre (por ejemplo, un porcentaje mínimo de captura exitosa, que se juntaría
 con DP-05), requisitos operativos (equipo, insumos) u otra cosa?

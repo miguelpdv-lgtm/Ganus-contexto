@@ -1,7 +1,8 @@
 # Esquema `forms` — Formularios dinámicos
 
-**Estado:** borrador v1 (2026-11-09), acordado por el responsable del módulo después del ejercicio con el formulario
-«Pesaje». Reemplaza al v0 (11 tablas) y a la propuesta de 8 tablas del mockup.
+**Estado:** borrador v1.1 (2026-11-10), acordado por el responsable del módulo. Parte del v1 (2026-11-09, ejercicio con
+el formulario «Pesaje») más la auditoría del 2026-11-10 (ver «Cambios de la v1.1»). Reemplaza al v0 (11 tablas) y a la
+propuesta de 8 tablas del mockup. Total: 6 tablas y 39 columnas.
 **Dueño:** Formularios y Planificación.
 **Fuentes:** 04 v1.3 (§7–§19, §24), 10 §9–§10, 09C §10.3–§10.4, skills `disenar-plantilla-formulario` y
 `versionar-formulario`.
@@ -39,6 +40,7 @@ erDiagram
         timestamptz creado_en
         uuid publicado_por
         timestamptz publicado_en
+        uuid obsoleto_por
         timestamptz obsoleto_en
     }
     clave_formulario {
@@ -65,12 +67,11 @@ erDiagram
         jsonb valor_inicial "origen y valor o referencia"
         jsonb reglas "validaciones"
         jsonb condiciones "visible_si, obligatorio_si (DP-11)"
-        uuid catalogo_maestro_id "ref logica, opcional"
+        varchar catalogo_maestro_ref "dominio:catalogo, ej. inventory:raza; opcional"
     }
     opcion_campo {
-        uuid id PK
-        uuid campo_formulario_id FK
-        varchar codigo "estable entre versiones, UK con campo"
+        uuid campo_formulario_id PK, FK
+        varchar codigo PK "estable entre versiones"
         varchar etiqueta
         int orden
     }
@@ -87,8 +88,9 @@ erDiagram
 | `campo_formulario.valor_inicial` | `{"origen": "CONFIGURATION", "valor": ...}`, `{"origen": "INVENTORY", "atributo_id": ...}`, `{"origen": "TASK", ...}` o `{"origen": "CONTEXT", ...}` | 04 §11 |
 | `campo_formulario.reglas` | Validaciones según el tipo: `min`, `max`, `decimals`, `minLength`, `maxLength`, `pattern`, `minSelected`, `maxSelected`, `minCount`, `maxCount` | 04 §16 |
 | `campo_formulario.condiciones` | `{"visible_si": {...}, "obligatorio_si": {...}}`. La obligatoriedad condicional y la evidencia requerida por condición se expresan aquí. Gramática en DP-11 | 04 §13, §15 |
-| `campo_formulario.catalogo_maestro_id` | Catálogo de otro dominio (por ejemplo, razas). Si es nulo, el campo de selección usa sus filas de `opcion_campo` | 04 §17 |
-| `opcion_campo.codigo` | Código estable de la opción (`normal`). Es lo que guarda `planning.valor_captura` | 04 §17 |
+| `campo_formulario.catalogo_maestro_ref` | Catálogo de otro dominio, con el dominio dueño incluido: `inventory:raza`. Se consume por contrato de ese dominio. Si es nulo, el campo de selección usa sus filas de `opcion_campo` | 04 §17, 08 §11 |
+| `opcion_campo.codigo` | Código estable de la opción (`normal`); junto con el campo forma la PK. Es lo que guarda `planning.valor_captura`, por eso la opción no necesita `id` | 04 §17 |
+| `version_formulario.obsoleto_por` / `obsoleto_en` | Quién y cuándo marcó la versión como obsoleta, igual que `publicado_por` / `publicado_en`. Quién puede hacerlo: DP-09 y DP-23 | 04 §24, 10 §16 |
 
 Tipos de campo (04 §12): `SHORT_TEXT`, `LONG_TEXT`, `INTEGER`, `DECIMAL`, `DATE`, `DATETIME`, `SINGLE_SELECT`,
 `MULTI_SELECT`, `BOOLEAN`, `PHOTO`, `DOCUMENT`, `VIDEO`, `VOICE_NOTE`, `SIGNATURE`.
@@ -104,11 +106,12 @@ Tipos de campo (04 §12): `SHORT_TEXT`, `LONG_TEXT`, `INTEGER`, `DECIMAL`, `DATE
 | Solo claves aptas | Al guardar, se verifica por contrato que Inventario publique el atributo como apto y que Organización tenga el nivel de espacio | 04 §8 |
 | Orden explícito y sin repetir | `UNIQUE (version_formulario_id, orden)` en secciones; `UNIQUE (seccion_id, orden)` en campos | 04 §14 |
 | Código de campo único por versión | El caso de uso lo valida (el campo llega a la versión por su sección) | 04 §11 |
-| Campo de selección con opciones | `SINGLE_SELECT` y `MULTI_SELECT` exigen `catalogo_maestro_id` o al menos una fila en `opcion_campo` (validación al publicar) | 04 §17 |
+| Opción única por campo | PK `(campo_formulario_id, codigo)` | 04 §17 |
+| Campo de selección con opciones | `SINGLE_SELECT` y `MULTI_SELECT` exigen `catalogo_maestro_ref` o al menos una fila en `opcion_campo` (validación al publicar) | 04 §17 |
 | Opciones históricas se conservan | Las opciones son de cada versión. «Desactivar» una opción es no copiarla a la versión siguiente; la versión anterior la conserva | 04 §17 |
 | Publicar exige tipo de activo | `tipo_activo_id` no nulo para pasar a `PUBLISHED` | DP-10 (acordado) |
 
-**Nueva versión:** se copian claves, secciones, campos y opciones con ids nuevos y los mismos `codigo`.
+**Nueva versión:** se copian claves, secciones y campos con ids nuevos, y las opciones con los mismos `codigo`.
 **Contrato hacia Planificación y Mobile:** se genera desde estas tablas al consultarlo; la versión publicada es
 inmutable, así que no hace falta guardar una copia JSON.
 
@@ -122,11 +125,29 @@ inmutable, así que no hace falta guardar una copia JSON.
 | Tabla | Filas |
 | --- | --- |
 | `formulario` | frm-01 «Pesaje» |
-| `version_formulario` | ver-01: versión 1, `PUBLISHED`, tipo de activo Bovino |
+| `version_formulario` | ver-01: versión 1, `PUBLISHED`, tipo de activo Bovino, sin `obsoleto_por` |
 | `clave_formulario` | (`SEARCH`, RFID, no filtro) · (`SEARCH`, Sexo, filtro) · (`SEARCH`, Edad, filtro) · (`CONTEXT`, nivel Potrero, filtro) |
 | `seccion_formulario` | sec-01 «Pesaje», orden 1 |
 | `campo_formulario` | `peso_kg` «Peso (kg)», `DECIMAL`, obligatorio, reglas `{min: 50, max: 1000}` · `condicion_corporal` «Condición corporal», `SINGLE_SELECT`, obligatorio |
 | `opcion_campo` | `flaca` «Flaca» · `normal` «Normal» · `gorda` «Gorda» |
+
+## Bloques de columnas
+
+Las columnas de cada tabla se pueden leer por bloques (el orden del diagrama es el mismo):
+
+| Tabla | Bloque | Columnas |
+| --- | --- | --- |
+| `formulario` | Identidad | `id`, `organizacion_id`, `nombre` |
+| `version_formulario` | Identidad | `id`, `formulario_id`, `numero_version` |
+| | Definición | `estado`, `tipo_activo_id`, `revision` |
+| | Ciclo de vida | `creado_por`, `creado_en`, `publicado_por`, `publicado_en`, `obsoleto_por`, `obsoleto_en` |
+| `clave_formulario` | Clave | `version_formulario_id`, `tipo`, `referencia_id` |
+| | Uso | `es_filtro` |
+| `seccion_formulario` | Todo | `id`, `version_formulario_id`, `titulo`, `orden` |
+| `campo_formulario` | Identidad y lugar | `id`, `seccion_id`, `codigo`, `orden` |
+| | Qué se captura | `nombre`, `tipo`, `ayuda`, `catalogo_maestro_ref` |
+| | Comportamiento | `obligatorio`, `valor_inicial`, `reglas`, `condiciones` |
+| `opcion_campo` | Todo | `campo_formulario_id`, `codigo`, `etiqueta`, `orden` |
 
 ## Cambios respecto al v0 y a la propuesta del mockup
 
@@ -145,6 +166,14 @@ inmutable, así que no hace falta guardar una copia JSON.
 | 11 | Sin ayuda ni condiciones (mockup) | `ayuda` y `condiciones` | 04 §11, §15 |
 | 12 | Tabla de eventos de la versión y JSON publicado (v0) | Columnas de creación, publicación y obsolescencia; sin copia JSON | Cada evento ocurre una vez; la versión publicada es inmutable |
 | 13 | `formulario.creado_por` y `creado_en` | Se quitan | La creación del formulario es la creación de su versión 1 |
+
+## Cambios de la v1.1 (auditoría del 2026-11-10)
+
+| # | v1 | v1.1 | Motivo |
+| --- | --- | --- | --- |
+| 1 | `catalogo_maestro_id` (uuid) | `catalogo_maestro_ref` (`dominio:catalogo`) | Un uuid solo no dice de qué dominio es el catálogo; el 08 exige consumirlo por contrato de su dueño |
+| 2 | `version_formulario.obsoleto_en` sin actor | Se agrega `obsoleto_por` | Creación y publicación ya tenían actor (10 §16) |
+| 3 | `opcion_campo.id` | PK `(campo_formulario_id, codigo)` | Nada referencia el id: las capturas guardan el código (reducción acordada) |
 
 ## Pendientes que afectan este esquema
 DP-08 (mapeo campo → atributo maestro: hoy no hay columna), DP-09 (versiones simultáneas y quién obsoleta), DP-11
